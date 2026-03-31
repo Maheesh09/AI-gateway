@@ -9,7 +9,7 @@ import (
 )
 
 func NewPool(databaseURL string) (*pgxpool.Pool, error) {
-	cfg, err := pgxpool.ParseConfig(databaseURL)
+	cfg, err := pgxpool.ParseConfig(databaseURL) // cfg is a pointer to a struct with all the connection settings
 	if err != nil {
 		return nil, fmt.Errorf("parse db url: %w", err)
 	}
@@ -20,7 +20,7 @@ func NewPool(databaseURL string) (*pgxpool.Pool, error) {
 	cfg.MaxConnLifetime = 30 * time.Minute // after 30 mins, connection is replaced with a new one to prevent stale connections.
 	cfg.MaxConnIdleTime = 5 * time.Minute  // if a connection is idle for 5 mins, close it. helps to free resources during low traffic.
 
-	pool, err := pgxpool.NewWithConfig(context.Background(), cfg)
+	pool, err := pgxpool.NewWithConfig(context.Background(), cfg) // pool is a pointer to a struct that manages a pool of connections to the database, and provides methods for acquiring and releasing connections.
 	if err != nil {
 		return nil, fmt.Errorf("create pool: %w", err)
 	}
