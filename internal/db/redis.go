@@ -8,14 +8,14 @@ import (
 )
 
 func NewRedisClient(redisURL string) (*redis.Client, error) {
-	opts, err := redis.ParseURL(redisURL)
+	opts, err := redis.ParseURL(redisURL) //opts is a pointer to the struct that contains all the options for connecting to Redis, such as address, password, and database number.
 	if err != nil {
 		return nil, fmt.Errorf("parse redis url: %w", err)
 	}
 
 	client := redis.NewClient(opts)
 
-	ctx := context.Background()
+	ctx := context.Background() // ctx is used to manage the lifetime of the connection attempt. If the connection cannot be established within a reasonable time, we can cancel the context to avoid hanging indefinitely.
 	if err := client.Ping(ctx).Err(); err != nil {
 		return nil, fmt.Errorf("ping redis: %w", err)
 	}
