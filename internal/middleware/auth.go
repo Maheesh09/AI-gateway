@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings" // Used for string manipulation
 
-	"github.com/Maheesh09/Ai-gateway/internal/repository"
+	"github.com/Maheesh09/ai-gateway/internal/repository"
 	"github.com/golang-jwt/jwt/v5" // 3rd party library for handling JWTs, used to validate Bearer tokens in the Authorization header.
 )
 
