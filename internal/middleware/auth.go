@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings" // Used for string manipulation
 
-	"github.com/Maheesh09/ai-gateway/internal/repository"
+	"github.com/Maheesh09/AI-gateway/internal/repository"
 	"github.com/golang-jwt/jwt/v5" // 3rd party library for handling JWTs, used to validate Bearer tokens in the Authorization header.
 )
 
@@ -33,7 +33,7 @@ func NewAuth(jwtSecret string, repo *repository.APIKeyRepo) *AuthMiddleware {
 func (m *AuthMiddleware) Handle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		// Try Bearer JWT first
+		// Try Bearer JWT first (for user-facing clients)
 		authHeader := r.Header.Get("Authorization")
 		if strings.HasPrefix(authHeader, "Bearer ") {
 			tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
@@ -45,7 +45,7 @@ func (m *AuthMiddleware) Handle(next http.Handler) http.Handler {
 			}
 		}
 
-		// Try X-API-Key header
+		// Try X-API-Key header (servie to service)
 		rawKey := r.Header.Get("X-API-Key")
 		if rawKey != "" {
 			if keyID, ownerID, ok := m.validateAPIKey(r.Context(), rawKey); ok {
