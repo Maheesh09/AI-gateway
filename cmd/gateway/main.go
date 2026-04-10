@@ -42,7 +42,7 @@ func main() {
 	alertRepo := repository.NewAlertRepo(pool)
 
 	// ── Asynq client (enqueue analysis jobs) ───────────────────────────────
-	asynqClient := asynq.NewClient(asynq.RedisClientOpt{Addr: cfg.RedisURL})
+	asynqClient := asynq.NewClient(asynq.RedisClientOpt{Addr: cfg.RedisAddr})
 	defer asynqClient.Close()
 
 	// ── Middleware ─────────────────────────────────────────────────────────

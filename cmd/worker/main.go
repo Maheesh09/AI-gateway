@@ -28,7 +28,7 @@ func main() {
 	worker := ai.NewWorker(detector, analyzer, alertRepo, logRepo)
 
 	srv := asynq.NewServer(
-		asynq.RedisClientOpt{Addr: cfg.RedisURL},
+		asynq.RedisClientOpt{Addr: cfg.RedisAddr},
 		asynq.Config{
 			Concurrency: 5,
 			Queues:      map[string]int{"default": 10},
