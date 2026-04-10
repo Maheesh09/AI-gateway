@@ -11,7 +11,7 @@ import (
 type LogRepo struct{}
 
 // GetStats returns aggregated request statistics for an API key since `since`.
-// TODO: implement real query against logs/store.
+// : implement real query against logs/store.
 func (r *LogRepo) GetStats(ctx context.Context, apiKeyID string, since time.Time) (*RequestStats, error) {
 	// Return empty/default stats for now.
 	stats := &RequestStats{
