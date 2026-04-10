@@ -1,14 +1,16 @@
 package model
 
-// ProxyRoute represents a configured route in the gateway that should be
-// proxied to an upstream service. Fields are minimal and only include what
-// the proxy and router currently use.
+import "time"
+
+// ProxyRoute represents a configured upstream proxy route.
 type ProxyRoute struct {
-    ID             string   `json:"id"`
-    PathPattern    string   `json:"path_pattern"`
-    TargetURL      string   `json:"target_url"`
-    StripPrefix    bool     `json:"strip_prefix"`
-    TimeoutMs      int      `json:"timeout_ms"`
-    AllowedMethods []string `json:"allowed_methods"`
-    IsActive       bool     `json:"is_active"`
+	ID             string    `json:"id"`
+	Name           string    `json:"name"`
+	PathPattern    string    `json:"path_pattern"`
+	TargetURL      string    `json:"target_url"`
+	AllowedMethods []string  `json:"allowed_methods"`
+	StripPrefix    bool      `json:"strip_prefix"`
+	TimeoutMs      int       `json:"timeout_ms"`
+	IsActive       bool      `json:"is_active"`
+	CreatedAt      time.Time `json:"created_at"`
 }
