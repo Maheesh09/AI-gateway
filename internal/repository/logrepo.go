@@ -24,3 +24,11 @@ func (r *LogRepo) GetStats(ctx context.Context, apiKeyID string, since time.Time
 	}
 	return stats, nil
 }
+
+// Insert persists a proxied request record. The payload type is kept generic
+// to avoid import cycles with the `ai` package; replace with a concrete
+// parameter or DTO when wiring to a real DB layer.
+func (r *LogRepo) Insert(ctx context.Context, payload interface{}) error {
+	// TODO: persist payload to logs table
+	return nil
+}
