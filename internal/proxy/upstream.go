@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yourusername/AI-gateway/internal/model"
+	"github.com/Maheesh09/AI-gateway/internal/model"
 )
 
 // NewUpstreamProxy creates a reverse proxy for the given route.
