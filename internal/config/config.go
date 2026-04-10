@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -12,8 +13,9 @@ import (
 type Config struct {
 	AppPort  string
 	AppEnv   string
-	DBUrl    string
-	RedisURL string
+	DBUrl     string
+	RedisURL  string // full redis://host:port URL — used by go-redis
+	RedisAddr string // bare host:port — used by asynq
 
 	JWTSecret   string
 	AdminAPIKey string
@@ -33,8 +35,12 @@ func Load() *Config {
 	cfg := &Config{
 		AppPort:         getRequired("APP_PORT"),
 		AppEnv:          getRequired("APP_ENV"),
-		DBUrl:           getRequired("DATABASE_URL"),
-		RedisURL:        getRequired("REDIS_URL"),
+		DBUrl:    getRequired("DATABASE_URL"),
+		RedisURL: getRequired("REDIS_URL"),
+		RedisAddr: strings.TrimPrefix(
+			strings.TrimPrefix(getRequired("REDIS_URL"), "redis://"),
+			"rediss://",
+		),
 		JWTSecret:       getRequired("JWT_SECRET"),
 		AdminAPIKey:     getRequired("ADMIN_API_KEY"),
 		AnthropicAPIKey: getRequired("ANTHROPIC_API_KEY"),

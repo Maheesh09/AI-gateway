@@ -1,0 +1,68 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: gateway
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: gateway_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gateway"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  gateway:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: gateway
+    ports:
+      - "8080:8080"
+    env_file: ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: worker
+    env_file: ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Asynq monitoring UI — http://localhost:8081
+  asynqmon:
+    image: hibiken/asynqmon:latest
+    ports:
+      - "8081:8080"
+    environment:
+      REDIS_ADDR: redis:6379
+    depends_on:
+      - redis
+
+volumes:
+  pgdata:
