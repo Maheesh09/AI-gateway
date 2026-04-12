@@ -90,17 +90,30 @@ Set auto_block to true only if severity is CRITICAL.`,
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode >= 400 {
+		var errData struct {
+			Error struct {
+				Message string `json:"message"`
+				Type    string `json:"type"`
+			} `json:"error"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&errData); err != nil {
+			return nil, fmt.Errorf("anthropic error status %d (could not decode error body)", resp.StatusCode)
+		}
+		return nil, fmt.Errorf("anthropic error (%s): %s", errData.Error.Type, errData.Error.Message)
+	}
+
 	var claudeResp struct {
 		Content []struct {
 			Text string `json:"text"`
 		} `json:"content"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&claudeResp); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("decode response: %w", err)
 	}
 
 	if len(claudeResp.Content) == 0 {
-		return nil, fmt.Errorf("empty response from Claude")
+		return nil, fmt.Errorf("empty content from Claude response")
 	}
 
 	var result AnalysisResult

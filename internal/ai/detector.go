@@ -24,7 +24,7 @@ func NewDetector(repo *repository.LogRepo) *Detector {
 // Evaluate inspects recent request history for a given API key.
 // Returns a signal indicating whether the AI analyzer should run.
 func (d *Detector) Evaluate(ctx context.Context, apiKeyID string) (*AnomalySignal, error) {
-	window := 5 * time.Minute
+	window := 1 * time.Minute
 	since := time.Now().Add(-window)
 
 	stats, err := d.logRepo.GetStats(ctx, apiKeyID, since)

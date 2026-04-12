@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/hibiken/asynq"
 
@@ -62,6 +63,8 @@ func (w *Worker) HandleAnalyzeTask(ctx context.Context, t *asynq.Task) error {
 		return fmt.Errorf("insert log: %w", err)
 	}
 
+	log.Printf("[worker] processed request: %s %s (status=%d, key=%s)", p.Method, p.Path, p.StatusCode, p.APIKeyID)
+
 	// Rule-based detector — no external API call
 	signal, err := w.detector.Evaluate(ctx, p.APIKeyID)
 	if err != nil {
@@ -72,13 +75,18 @@ func (w *Worker) HandleAnalyzeTask(ctx context.Context, t *asynq.Task) error {
 		return nil
 	}
 
+	log.Printf("[worker] !! ANOMALY DETECTED: type=%s, key=%s. Triggering AI analysis...", signal.TriggerType, p.APIKeyID)
+
 	// Escalate to Claude only when rules fire
 	result, err := w.analyzer.Analyze(ctx, p.APIKeyID, signal)
 	if err != nil {
+		log.Printf("[worker] AI Analysis FAILED: %v", err)
 		// Fault-tolerant fallback: store a rule-only alert so nothing is lost
 		return w.alertRepo.Insert(ctx, p.APIKeyID, signal.TriggerType, "MEDIUM",
 			"AI analysis unavailable — triggered by rule: "+signal.TriggerType, false)
 	}
+
+	log.Printf("[worker] AI Analysis SUCCESS: severity=%s, block=%v, explanation=%s", result.Severity, result.AutoBlock, result.Explanation)
 
 	return w.alertRepo.Insert(ctx, p.APIKeyID, signal.TriggerType,
 		result.Severity, result.Explanation, result.AutoBlock)
