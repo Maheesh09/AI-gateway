@@ -23,6 +23,7 @@ func NewUpstreamProxy(route *model.ProxyRoute) (*httputil.ReverseProxy, error) {
 			// Rewrite scheme + host
 			req.URL.Scheme = targetURL.Scheme
 			req.URL.Host = targetURL.Host
+			req.Host = targetURL.Host
 
 			// Strip gateway prefix if configured
 			if route.StripPrefix {
@@ -48,6 +49,15 @@ func NewUpstreamProxy(route *model.ProxyRoute) (*httputil.ReverseProxy, error) {
 			MaxIdleConns:          100,
 			MaxConnsPerHost:       10,
 			IdleConnTimeout:       90 * time.Second,
+		},
+
+		ModifyResponse: func(resp *http.Response) error {
+			// Strip upstream CORS headers to avoid duplicates/conflicts with our own middleware.
+			// This ensures the dashboard (browser) doesn't reject the response.
+			resp.Header.Del("Access-Control-Allow-Origin")
+			resp.Header.Del("Access-Control-Allow-Methods")
+			resp.Header.Del("Access-Control-Allow-Headers")
+			return nil
 		},
 
 		ErrorHandler: func(w http.ResponseWriter, r *http.Request, err error) {
