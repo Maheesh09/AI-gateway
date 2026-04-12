@@ -1931,8 +1931,8 @@
         const rows = alerts.slice(0, 5).map(a => `
       <tr>
         <td>${severityBadge(a.severity)}</td>
-        <td style="font-size:12px; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${a.anomaly_type || 'Unknown'}</td>
-        <td class="td-mono">${fmt(a.detected_at)}</td>
+        <td style="font-size:12px; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${a.trigger_type || 'Unknown'}</td>
+        <td class="td-mono">${fmt(a.created_at)}</td>
       </tr>`).join('');
         document.getElementById('overview-alerts-table').innerHTML = alerts.length
           ? `<table><thead><tr><th>Severity</th><th>Type</th><th>Detected</th></tr></thead><tbody>${rows}</tbody></table>`
@@ -2169,14 +2169,14 @@
         const rows = alerts.map(a => `
       <tr>
         <td>${severityBadge(a.severity)}</td>
-        <td style="font-weight:500; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${a.anomaly_type || 'Unknown'}</td>
+        <td style="font-weight:500; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${a.trigger_type || 'Unknown'}</td>
         <td class="td-mono truncate">${a.api_key_id || '—'}</td>
-        <td>${a.is_resolved ? `<span class="badge badge-teal">resolved</span>` : `<span class="badge badge-red">open</span>`}</td>
-        <td class="td-mono" style="font-size:11px;">${fmt(a.detected_at)}</td>
+        <td>${a.resolved_at ? `<span class="badge badge-teal">resolved</span>` : `<span class="badge badge-red">open</span>`}</td>
+        <td class="td-mono" style="font-size:11px;">${fmt(a.created_at)}</td>
         <td>
           <div style="display:flex; gap:6px;">
             <button class="btn btn-ghost btn-xs" onclick="viewAlert('${a.id}')">Details</button>
-            ${!a.is_resolved ? `<button class="btn btn-success btn-xs" onclick="resolveAlert('${a.id}')">Resolve</button>` : ''}
+            ${!a.resolved_at ? `<button class="btn btn-success btn-xs" onclick="resolveAlert('${a.id}')">Resolve</button>` : ''}
           </div>
         </td>
       </tr>`).join('');
@@ -2204,25 +2204,26 @@
         </div>
         <div>
           <div class="form-label">Status</div>
-          ${a.is_resolved ? `<span class="badge badge-teal">resolved</span>` : `<span class="badge badge-red">open</span>`}
+          ${a.resolved_at ? `<span class="badge badge-teal">resolved</span>` : `<span class="badge badge-red">open</span>`}
         </div>
         <div>
-          <div class="form-label">Anomaly Type</div>
-          <div style="font-size:13px; font-weight:500;">${a.anomaly_type || '—'}</div>
+          <div class="form-label">Trigger Type</div>
+          <div style="font-size:13px; font-weight:500; text-transform:capitalize;">${(a.trigger_type || '—').replace('_', ' ')}</div>
         </div>
         <div>
           <div class="form-label">Detected At</div>
-          <div class="td-mono" style="font-size:12px;">${fmt(a.detected_at)}</div>
+          <div class="td-mono" style="font-size:12px;">${fmt(a.created_at)}</div>
         </div>
         <div style="grid-column:1/-1;">
           <div class="form-label">API Key ID</div>
           <code style="font-family:var(--mono); font-size:11px; color:var(--sky);">${a.api_key_id || '—'}</code>
         </div>
+        ${a.auto_blocked ? `<div style="grid-column:1/-1;"><span class="badge badge-red">⚠ Key was auto-blocked</span></div>` : ''}
       </div>
-      <div class="form-label" style="margin-bottom:6px;">Claude AI Explanation</div>
-      <div class="code-block" style="color:var(--txt2); max-height:200px; overflow-y:auto; font-size:11px; line-height:1.7;">${a.claude_explanation || 'No AI explanation available yet.'}</div>
+      <div class="form-label" style="margin-bottom:8px;">AI Analysis Explanation</div>
+      <div style="background:var(--bg3); border:1px solid var(--line2); border-left:3px solid var(--${a.severity === 'CRITICAL' ? 'red' : a.severity === 'HIGH' ? 'amber' : a.severity === 'MEDIUM' ? 'violet' : 'teal'}); border-radius:var(--r); padding:14px 16px; color:var(--txt); font-size:13px; line-height:1.8; white-space:pre-wrap;">${a.ai_explanation || 'No AI explanation available yet. This usually means the anomaly was detected by a rule but the AI analysis call failed or was skipped.'}</div>
     `;
-        if (!a.is_resolved) {
+        if (!a.resolved_at) {
           document.getElementById('alert-detail-footer').innerHTML = `
         <button class="btn btn-ghost" onclick="closeModal('alert-detail-modal')">Close</button>
         <button class="btn btn-ghost" onclick="resolveAlert('${a.id}', false); closeModal('alert-detail-modal')">Resolve (keep key disabled)</button>
