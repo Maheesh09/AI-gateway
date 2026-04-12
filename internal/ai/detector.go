@@ -2,6 +2,7 @@ package ai
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/Maheesh09/AI-gateway/internal/repository"
@@ -31,6 +32,8 @@ func (d *Detector) Evaluate(ctx context.Context, apiKeyID string) (*AnomalySigna
 	if err != nil {
 		return nil, err
 	}
+
+	log.Printf("[detector] stats for key %s: total=%d, rpm=%.1f (threshold=40)", apiKeyID, stats.TotalRequests, stats.RequestsPerMin)
 
 	signal := &AnomalySignal{RecentStats: stats}
 

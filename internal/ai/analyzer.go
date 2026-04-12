@@ -30,6 +30,10 @@ func NewAnalyzer(apiKey, model string) *Analyzer {
 }
 
 func (a *Analyzer) Analyze(ctx context.Context, apiKeyID string, signal *AnomalySignal) (*AnalysisResult, error) {
+	if a.model == "mock" {
+		return a.mockAnalyze(signal)
+	}
+
 	stats := signal.RecentStats
 
 	prompt := fmt.Sprintf(`You are a security analyst reviewing API gateway traffic anomalies.
@@ -120,6 +124,37 @@ Set auto_block to true only if severity is CRITICAL.`,
 	if err := json.Unmarshal([]byte(claudeResp.Content[0].Text), &result); err != nil {
 		return nil, fmt.Errorf("parse claude json: %w", err)
 	}
-
 	return &result, nil
+}
+
+func (a *Analyzer) mockAnalyze(signal *AnomalySignal) (*AnalysisResult, error) {
+	// Simulate the thinking process
+	time.Sleep(500 * time.Millisecond)
+
+	switch signal.TriggerType {
+	case "burst_traffic":
+		return &AnalysisResult{
+			Severity:    "HIGH",
+			Explanation: "I am observing a sudden spike in traffic from a single API key. This pattern is often associated with automated scrapers or potential DoS attempts. The rate has exceeded the 40 RPS threshold in a 1-minute window.",
+			AutoBlock:   false,
+		}, nil
+	case "error_spike":
+		return &AnalysisResult{
+			Severity:    "MEDIUM",
+			Explanation: "The API key is producing an unusually high volume of 4xx/5xx responses. This could indicate a client-side integration bug or an attempt to probe for non-existent resources (fuzzing).",
+			AutoBlock:   false,
+		}, nil
+	case "scan_pattern":
+		return &AnalysisResult{
+			Severity:    "CRITICAL",
+			Explanation: "CRITICAL: Detected requests for this API key arriving from over 20 unique IP addresses in a very short window. This strongly suggests a distributed scanning tool or compromised key. Recommending immediate suspension.",
+			AutoBlock:   true,
+		}, nil
+	default:
+		return &AnalysisResult{
+			Severity:    "LOW",
+			Explanation: "Minor traffic anomaly detected by rules, but the pattern does not match known malicious signatures. Monitoring recommended.",
+			AutoBlock:   false,
+		}, nil
+	}
 }
