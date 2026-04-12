@@ -1,14 +1,13 @@
 # AI-Powered API Gateway
 
-A production-grade reverse proxy written in Go. Handles JWT authentication, per-key rate limiting using a sliding window algorithm, dynamic route management, and an async AI layer that detects and explains suspicious traffic patterns using Claude.
+A production-grade reverse proxy written in Go. Handles JWT authentication, per-key rate limiting using a sliding window algorithm, dynamic route management and an async AI layer that detects and explains suspicious traffic patterns using Claude.
 
-Built as a personal backend engineering project to demonstrate real distributed systems concepts — not a CRUD app.
 
 ---
 
 ## What it does
 
-Incoming requests hit the gateway, pass through an ordered middleware pipeline (auth → rate limit → route match → proxy), and are forwarded to registered upstream services. After each request is proxied, a background job is dispatched to an AI worker that analyses recent traffic patterns. If the traffic looks suspicious — burst activity, high error rates, scanning behaviour — the worker calls the Claude API, which generates a plain-English explanation and a severity rating. CRITICAL alerts automatically disable the offending API key until an admin resolves it.
+Incoming requests hit the gateway, pass through an ordered middleware pipeline (auth → rate limit → route match → proxy) and are forwarded to registered upstream services. After each request is proxied, a background job is dispatched to an AI worker that analyses recent traffic patterns. If the traffic looks suspicious burst activity, high error rates, scanning behaviour the worker calls the Claude API, which generates a plain-English explanation and a severity rating. CRITICAL alerts automatically disable the offending API key until an admin resolves it.
 
 ```
 Client → Auth middleware → Rate limiter → Route matcher → Reverse proxy → Upstream
@@ -46,7 +45,7 @@ Client → Auth middleware → Rate limiter → Route matcher → Reverse proxy 
 
 Two independent Go binaries, both compiled from the same repository:
 
-**`cmd/gateway`** — handles live HTTP traffic. Synchronous, latency-sensitive. Authenticates requests, enforces rate limits, proxies to upstream services, and enqueues analysis jobs.
+**`cmd/gateway`** — handles live HTTP traffic. Synchronous, latency-sensitive. Authenticates requests, enforces rate limits, proxies to upstream services and enqueues analysis jobs.
 
 **`cmd/worker`** — processes background jobs from the Redis queue. Runs the anomaly detector and calls Claude when rules are triggered. Decoupled from the gateway so it can be scaled and restarted independently without affecting traffic.
 
@@ -483,11 +482,11 @@ This starts Postgres, Redis, the gateway, the worker, and the asynq monitoring U
 
 **Sliding window rate limiter via Redis sorted sets**
 
-Each API key has a sorted set in Redis where every member is a request UUID and its score is the timestamp in milliseconds. On each request, a Lua script atomically removes entries older than the window, counts what remains, and adds the new request if under the limit. The atomic Lua execution prevents race conditions that would allow clients to exceed their limit under concurrent load. A naive fixed-window counter allows clients to double their effective rate by timing requests at window boundaries — the sliding window prevents this.
+Each API key has a sorted set in Redis where every member is a request UUID and its score is the timestamp in milliseconds. On each request, a Lua script atomically removes entries older than the window, counts what remains and adds the new request if under the limit. The atomic Lua execution prevents race conditions that would allow clients to exceed their limit under concurrent load. A naive fixed-window counter allows clients to double their effective rate by timing requests at window boundaries, the sliding window prevents this.
 
 **Two-stage AI analysis**
 
-The worker doesn't call Claude on every request — that would be expensive and slow. A fast rule-based detector runs first (burst traffic > 40 req/min, error rate > 30%, scanning pattern > 20 unique IPs). Claude is only called when a rule triggers. Claude's job is specifically what LLMs are good at: synthesising ambiguous data into a plain-English explanation. Everything deterministic (counting, comparing, storing) is done in regular Go code.
+The worker doesn't call Claude on every request. That would be expensive and slow. A fast rule-based detector runs first (burst traffic > 40 req/min, error rate > 30%, scanning pattern > 20 unique IPs). Claude is only called when a rule triggers. Claude's job is specifically what LLMs are good at: synthesising ambiguous data into a plain-English explanation. Everything deterministic (counting, comparing, storing) is done in regular Go code.
 
 **Two-binary design**
 
@@ -495,11 +494,11 @@ The gateway must be fast and synchronous. The AI analysis is slow (Claude API ta
 
 **SHA-256 API key hashing**
 
-Raw API keys are never stored. On creation, the raw key is returned to the caller once and only the SHA-256 hash is persisted. On every request, the incoming key is hashed and the hashes are compared. A database breach exposes hashes — computationally infeasible to reverse for a randomly-generated 64-character key.
+Raw API keys are never stored. On creation, the raw key is returned to the caller once and only the SHA-256 hash is persisted. On every request, the incoming key is hashed and the hashes are compared. A database breach exposes hashes computationally infeasible to reverse for a randomly-generated 64-character key.
 
 **Repository pattern with interfaces**
 
-Every database interaction is behind an interface. The auth middleware depends on `APIKeyRepository` (interface), not `PostgresAPIKeyRepo` (concrete). This means tests inject a mock that satisfies the same interface — no real database required for unit tests. This is Dependency Inversion from SOLID applied practically.
+Every database interaction is behind an interface. The auth middleware depends on `APIKeyRepository` (interface), not `PostgresAPIKeyRepo` (concrete). This means tests inject a mock that satisfies the same interface.  No real database required for unit tests. This is Dependency Inversion from SOLID applied practically.
 
 ---
 
