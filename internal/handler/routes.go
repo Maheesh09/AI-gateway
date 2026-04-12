@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -22,6 +23,7 @@ func NewRouteHandler(repo *repository.RouteRepo) *RouteHandler {
 func (h *RouteHandler) List(w http.ResponseWriter, r *http.Request) {
 	routes, err := h.repo.List(r.Context())
 	if err != nil {
+		log.Printf("error listing routes: %v", err)
 		writeJSON(w, http.StatusInternalServerError, errBody("could not list routes"))
 		return
 	}
@@ -58,6 +60,7 @@ func (h *RouteHandler) Create(w http.ResponseWriter, r *http.Request) {
 		body.AllowedMethods, body.StripPrefix, body.TimeoutMs,
 	)
 	if err != nil {
+		log.Printf("error creating route: %v", err)
 		writeJSON(w, http.StatusInternalServerError, errBody("could not create route"))
 		return
 	}

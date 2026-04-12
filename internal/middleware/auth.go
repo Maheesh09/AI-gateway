@@ -74,7 +74,13 @@ func (m *AuthMiddleware) validateJWT(tokenStr string) (keyID, ownerID string, ok
 		return "", "", false
 	}
 
-	return claims["key_id"].(string), claims["owner_id"].(string), true
+	keyIDVal, ok1 := claims["key_id"].(string)
+	ownerIDVal, ok2 := claims["owner_id"].(string)
+	if !ok1 || !ok2 {
+		return "", "", false
+	}
+
+	return keyIDVal, ownerIDVal, true
 }
 
 func (m *AuthMiddleware) validateAPIKey(ctx context.Context, rawKey string) (keyID, ownerID string, ok bool) {
@@ -83,7 +89,10 @@ func (m *AuthMiddleware) validateAPIKey(ctx context.Context, rawKey string) (key
 	keyHash := hex.EncodeToString(hash[:])
 
 	key, err := m.apiKeyRepo.FindByHash(ctx, keyHash)
-	if err != nil || !key.IsActive {
+	if err != nil || key == nil {
+		return "", "", false
+	}
+	if !key.IsActive {
 		return "", "", false
 	}
 

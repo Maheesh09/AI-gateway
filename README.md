@@ -107,7 +107,8 @@ JWT_SECRET=your-random-secret-here
 ADMIN_API_KEY=your-admin-key-here
 
 ANTHROPIC_API_KEY=sk-ant-...
-ANTHROPIC_MODEL=claude-sonnet-4-6
+# Set to 'mock' to test the AI pipeline without spending credits:
+ANTHROPIC_MODEL=mock
 
 RATE_LIMIT_DEFAULT_RPM=60
 RATE_LIMIT_WINDOW_SECONDS=60
@@ -239,16 +240,18 @@ This tells the gateway: *"Requests to `/api/fakestore/*` should be forwarded to 
 **Via PowerShell:**
 ```powershell
 $routeBody = @{
-    name         = "fakestore"
-    path_pattern = "/api/fakestore/*"
-    target_url   = "https://fakestoreapi.com"
+    name         = "httpbin"
+    path_pattern = "/api/httpbin/*"
+    target_url   = "https://httpbin.org"
     strip_prefix = $true
 } | ConvertTo-Json
 
 Invoke-RestMethod -Uri "http://localhost:8080/v1/admin/routes" -Method POST -Headers $adminHeaders -Body $routeBody
 ```
 
-> **`strip_prefix = true`** means the gateway strips `/api/fakestore` before forwarding, so `/api/fakestore/products/1` becomes `/products/1` at the upstream.
+> **`strip_prefix = true`** means the gateway strips `/api/httpbin` before forwarding, so `/api/httpbin/get` becomes `/get` at the upstream.
+
+> **Note on FakeStoreAPI:** `fakestoreapi.com` has recurring SSL issues. Use `https://httpbin.org` as a reliable free alternative during development.
 
 ---
 
@@ -256,7 +259,7 @@ Invoke-RestMethod -Uri "http://localhost:8080/v1/admin/routes" -Method POST -Hea
 
 Replace `<YOUR_RAW_KEY>` with the key from Step 1.
 
-**Via the Dashboard:** Go to **Test Proxy**, paste your API key, set the path to `/api/fakestore/products/1`, and click Send.
+**Via the Dashboard:** Go to **Test Proxy**, paste your API key, set the path to `/api/httpbin/get`, and click Send.
 
 **Via PowerShell:**
 ```powershell
@@ -264,9 +267,11 @@ $clientHeaders = @{
     "X-API-Key" = "<YOUR_RAW_KEY>"
 }
 
-$response = Invoke-RestMethod -Uri "http://localhost:8080/api/fakestore/products/1" -Method GET -Headers $clientHeaders
+$response = Invoke-RestMethod -Uri "http://localhost:8080/api/httpbin/get" -Method GET -Headers $clientHeaders
 $response | ConvertTo-Json
 ```
+
+> **Important:** The `X-API-Key` header must contain **only** the raw `gw_...` key string — not the full JSON object returned by the create endpoint.
 
 The request passes through the full middleware chain:
 1. Auth middleware validates your API key against the database
@@ -281,14 +286,26 @@ The request passes through the full middleware chain:
 
 Send 50 rapid requests to trigger the burst-traffic rule (threshold: 40 req/min):
 
+> **Before running:** Set `$clientHeaders` in your PowerShell session:
+> ```powershell
+> $clientHeaders = @{ "X-API-Key" = "<YOUR_RAW_KEY>" }
+> ```
+
 ```powershell
 1..50 | ForEach-Object {
-    Invoke-RestMethod -Uri "http://localhost:8080/api/fakestore/products/1" -Method GET -Headers $clientHeaders
+    Invoke-RestMethod -Uri "http://localhost:8080/api/httpbin/get" -Method GET -Headers $clientHeaders
     Write-Host "Sent request $_"
 }
 ```
 
-Watch the **worker terminal** — you will see it detect burst activity, enqueue an AI job, and call Claude to generate a plain-English anomaly report.
+Watch the **worker terminal** — you will see log lines like:
+```
+[detector] stats for key ...: total=XX, rpm=YY (threshold=40)
+[worker] !! ANOMALY DETECTED: type=burst_traffic, ...
+[worker] AI Analysis SUCCESS: severity=HIGH, ...
+```
+
+> **No Anthropic credits?** Set `ANTHROPIC_MODEL=mock` in your `.env` file. The mock analyzer produces realistic canned responses for each trigger type (`burst_traffic`, `error_spike`, `scan_pattern`) without making any external API calls.
 
 ---
 
@@ -456,7 +473,7 @@ This starts Postgres, Redis, the gateway, the worker, and the asynq monitoring U
 | `JWT_SECRET` | yes | Secret for signing/verifying JWTs |
 | `ADMIN_API_KEY` | yes | Static key for admin endpoints |
 | `ANTHROPIC_API_KEY` | yes | Claude API key |
-| `ANTHROPIC_MODEL` | no | Default: `claude-sonnet-4-6` |
+| `ANTHROPIC_MODEL` | no | Model name or `mock` (default: `claude-3-5-sonnet-20240620`). Set to `mock` to test the AI pipeline without API credits. |
 | `RATE_LIMIT_DEFAULT_RPM` | no | Default requests per minute (default: 60) |
 | `RATE_LIMIT_WINDOW_SECONDS` | no | Window size in seconds (default: 60) |
 

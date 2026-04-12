@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -36,6 +37,7 @@ func (h *KeyHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	result, err := h.svc.Create(r.Context(), input)
 	if err != nil {
+		log.Printf("error creating api key: %v", err)
 		writeJSON(w, http.StatusInternalServerError, errBody("could not create key"))
 		return
 	}
@@ -55,6 +57,7 @@ func (h *KeyHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	keys, err := h.repo.List(r.Context(), page, limit)
 	if err != nil {
+		log.Printf("error listing api keys: %v", err)
 		writeJSON(w, http.StatusInternalServerError, errBody("could not list keys"))
 		return
 	}

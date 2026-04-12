@@ -72,6 +72,9 @@ func (r *APIKeyRepo) FindByHash(ctx context.Context, hash string) (*APIKey, erro
 
 // Create inserts a new API key row and returns the persisted record.
 func (r *APIKeyRepo) Create(ctx context.Context, name, ownerID, keyHash string, scopes []string, rateLimitRPM int, expiresAt *time.Time) (*APIKey, error) {
+	if scopes == nil {
+		scopes = []string{}
+	}
 	row := r.pool.QueryRow(ctx, `
 		INSERT INTO api_keys (name, owner_id, key_hash, scopes, rate_limit_rpm, expires_at)
 		VALUES ($1, $2, $3, $4, $5, $6)

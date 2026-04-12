@@ -2,6 +2,7 @@ package ai
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/Maheesh09/AI-gateway/internal/repository"
@@ -24,13 +25,15 @@ func NewDetector(repo *repository.LogRepo) *Detector {
 // Evaluate inspects recent request history for a given API key.
 // Returns a signal indicating whether the AI analyzer should run.
 func (d *Detector) Evaluate(ctx context.Context, apiKeyID string) (*AnomalySignal, error) {
-	window := 5 * time.Minute
+	window := 1 * time.Minute
 	since := time.Now().Add(-window)
 
 	stats, err := d.logRepo.GetStats(ctx, apiKeyID, since)
 	if err != nil {
 		return nil, err
 	}
+
+	log.Printf("[detector] stats for key %s: total=%d, rpm=%.1f (threshold=40)", apiKeyID, stats.TotalRequests, stats.RequestsPerMin)
 
 	signal := &AnomalySignal{RecentStats: stats}
 

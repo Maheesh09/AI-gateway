@@ -62,6 +62,7 @@ func main() {
 	r.Use(chiMiddleware.Recoverer)
 	r.Use(chiMiddleware.RequestID)
 	r.Use(appMiddleware.Logger)
+	r.Use(appMiddleware.CORS)
 
 	// Health — no auth required
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {

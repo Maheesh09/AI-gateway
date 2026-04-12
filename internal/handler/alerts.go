@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -33,6 +34,7 @@ func (h *AlertHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	alerts, err := h.repo.List(r.Context(), severity, resolved)
 	if err != nil {
+		log.Printf("error listing alerts: %v", err)
 		writeJSON(w, http.StatusInternalServerError, errBody("could not list alerts"))
 		return
 	}
@@ -44,6 +46,7 @@ func (h *AlertHandler) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	alert, err := h.repo.GetByID(r.Context(), id)
 	if err != nil {
+		log.Printf("error fetching alert: %v", err)
 		writeJSON(w, http.StatusNotFound, errBody("alert not found"))
 		return
 	}
@@ -58,6 +61,7 @@ func (h *AlertHandler) Resolve(w http.ResponseWriter, r *http.Request) {
 	reEnable := r.URL.Query().Get("re_enable_key") == "true"
 
 	if err := h.repo.Resolve(r.Context(), id, reEnable); err != nil {
+		log.Printf("error resolving alert: %v", err)
 		writeJSON(w, http.StatusInternalServerError, errBody("could not resolve alert"))
 		return
 	}
