@@ -29,7 +29,8 @@ func NewRedisClient(redisURL string) (*redis.Client, error) {
 // 3. Add current request if under limit
 // 4. Set TTL on the key
 // Returns the current count BEFORE adding this request.
-var SlidingWindowScript = redis.NewScript(` // atomic read write for sliding window rate limiting
+// atomic read write for sliding window rate limiting
+var SlidingWindowScript = redis.NewScript(`
 local key    = KEYS[1]
 local now    = tonumber(ARGV[1])
 local window = tonumber(ARGV[2])

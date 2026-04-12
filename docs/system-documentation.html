@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-Powered API Gateway — Complete System Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #21262d;
+    --accent: #58a6ff;
+    --accent2: #bc8cff;
+    --accent3: #3fb950;
+    --accent4: #f78166;
+    --accent5: #e3b341;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --card: #1c2128;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(13,17,23,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; gap: 2rem; height: 56px;
+  }
+  .nav-logo { font-weight: 700; font-size: 1rem; color: var(--accent); white-space: nowrap; }
+  .nav-links { display: flex; gap: 1.5rem; overflow-x: auto; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; white-space: nowrap; transition: color .2s; }
+  .nav-links a:hover { color: var(--text); }
+
+  /* ── LAYOUT ── */
+  .wrapper { max-width: 1100px; margin: 0 auto; padding: 80px 2rem 4rem; }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    padding: 4rem 2rem 3rem;
+    background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(88,166,255,.12), transparent);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    margin-bottom: 3rem;
+  }
+  .hero h1 { font-size: 2.6rem; font-weight: 700; background: linear-gradient(135deg,#58a6ff,#bc8cff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.2; margin-bottom: 1rem; }
+  .hero p { color: var(--muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto 2rem; }
+  .badges { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; }
+  .badge { padding: .3rem .75rem; border-radius: 999px; font-size: .75rem; font-weight: 600; letter-spacing: .03em; }
+  .badge-go    { background: rgba(0,173,216,.15); color: #00add8; border: 1px solid rgba(0,173,216,.3); }
+  .badge-pg    { background: rgba(51,103,178,.15); color: #336fb2; border: 1px solid rgba(51,103,178,.3); }
+  .badge-redis { background: rgba(220,50,47,.15); color: #dc322f; border: 1px solid rgba(220,50,47,.3); }
+  .badge-ai    { background: rgba(188,140,255,.15); color: #bc8cff; border: 1px solid rgba(188,140,255,.3); }
+  .badge-docker { background: rgba(42,130,228,.15); color: #2a82e4; border: 1px solid rgba(42,130,228,.3); }
+
+  /* ── SECTION ── */
+  section { margin-bottom: 3.5rem; }
+  .section-title {
+    font-size: 1.4rem; font-weight: 700;
+    display: flex; align-items: center; gap: .75rem;
+    padding-bottom: .75rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.75rem;
+  }
+  .section-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+  .icon-arch   { background: rgba(88,166,255,.15); }
+  .icon-flow   { background: rgba(63,185,80,.15); }
+  .icon-pkg    { background: rgba(188,140,255,.15); }
+  .icon-api    { background: rgba(227,179,65,.15); }
+  .icon-test   { background: rgba(248,129,102,.15); }
+  .icon-perf   { background: rgba(88,166,255,.15); }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    transition: border-color .2s;
+  }
+  .card:hover { border-color: rgba(88,166,255,.4); }
+  .card-header { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+  .card-title { font-weight: 600; font-size: 1rem; }
+  .card-file { font-family: 'JetBrains Mono', monospace; font-size: .8rem; color: var(--accent); background: rgba(88,166,255,.1); padding: .2rem .5rem; border-radius: 4px; }
+  .card-desc { color: var(--muted); font-size: .9rem; margin-bottom: 1rem; }
+
+  /* ── GRID ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* ── CODE ── */
+  pre {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .82rem;
+    overflow-x: auto;
+    line-height: 1.6;
+    margin: .75rem 0;
+  }
+  .kw { color: #ff7b72; }
+  .fn { color: #d2a8ff; }
+  .st { color: #a5d6ff; }
+  .cm { color: #8b949e; }
+  .ty { color: #ffa657; }
+  .nu { color: #79c0ff; }
+
+  /* ── FUNCTION TABLE ── */
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; margin: .75rem 0; }
+  th { background: var(--surface); padding: .6rem 1rem; text-align: left; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: .6rem 1rem; border-bottom: 1px solid rgba(33,38,45,.8); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { font-family: 'JetBrains Mono', monospace; font-size: .8rem; color: var(--accent2); white-space: nowrap; }
+  td:nth-child(2) { color: var(--muted); }
+
+  /* ── DIAGRAM ── */
+  .diagram {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+  }
+  .flow {
+    display: flex; align-items: center; gap: 0; flex-wrap: nowrap;
+    min-width: 700px;
+  }
+  .flow-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: .6rem 1rem; text-align: center; font-size: .8rem; font-weight: 600; white-space: nowrap;
+  }
+  .flow-box.accent1 { border-color: rgba(88,166,255,.5); color: var(--accent); }
+  .flow-box.accent2 { border-color: rgba(63,185,80,.5); color: var(--accent3); }
+  .flow-box.accent3 { border-color: rgba(188,140,255,.5); color: var(--accent2); }
+  .flow-box.accent4 { border-color: rgba(227,179,65,.5); color: var(--accent5); }
+  .flow-box.accent5 { border-color: rgba(248,129,102,.5); color: var(--accent4); }
+  .flow-arrow { color: var(--muted); font-size: 1.2rem; padding: 0 .5rem; flex-shrink: 0; }
+  .flow-label { font-size: .65rem; color: var(--muted); margin-top: .25rem; }
+
+  /* ── CALLOUT ── */
+  .callout { border-left: 3px solid; padding: 1rem 1.25rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: .9rem; }
+  .callout-info  { border-color: var(--accent); background: rgba(88,166,255,.06); }
+  .callout-warn  { border-color: var(--accent5); background: rgba(227,179,65,.06); }
+  .callout-success { border-color: var(--accent3); background: rgba(63,185,80,.06); }
+  .callout-title { font-weight: 700; margin-bottom: .25rem; }
+
+  /* ── REQUEST FLOW DETAIL ── */
+  .step-list { counter-reset: steps; }
+  .step {
+    counter-increment: steps;
+    display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1rem;
+    padding: 1rem; background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  }
+  .step::before {
+    content: counter(steps);
+    min-width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(88,166,255,.15); color: var(--accent);
+    font-weight: 700; font-size: .85rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-content strong { color: var(--text); }
+  .step-content p { color: var(--muted); font-size: .88rem; margin-top: .2rem; }
+
+  /* ── ENV TABLE ── */
+  .env-key { font-family: 'JetBrains Mono', monospace; font-size: .82rem; color: var(--accent5); }
+  .env-val { font-family: 'JetBrains Mono', monospace; font-size: .82rem; color: var(--accent3); }
+
+  /* ── CURL BLOCK ── */
+  .curl-title { font-size: .78rem; color: var(--muted); margin-bottom: .4rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+
+  /* ── API TABLE ── */
+  .method { display: inline-block; padding: .15rem .5rem; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: .75rem; font-weight: 700; }
+  .GET    { background: rgba(63,185,80,.15); color: #3fb950; }
+  .POST   { background: rgba(88,166,255,.15); color: #58a6ff; }
+  .DELETE { background: rgba(248,129,102,.15); color: #f78166; }
+  .PATCH  { background: rgba(227,179,65,.15); color: #e3b341; }
+  .PUT    { background: rgba(188,140,255,.15); color: #bc8cff; }
+
+  /* ── ARCHITECTURE LAYERS ── */
+  .arch-layers { display: flex; flex-direction: column; gap: .5rem; margin: 1.5rem 0; }
+  .arch-layer {
+    padding: 1rem 1.5rem; border-radius: 10px; border: 1px solid;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .arch-layer-label { font-weight: 600; font-size: .9rem; min-width: 120px; }
+  .arch-layer-items { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .arch-layer-tag { padding: .2rem .6rem; border-radius: 4px; font-size: .78rem; font-family: 'JetBrains Mono', monospace; background: rgba(255,255,255,.06); }
+
+  /* ── IMPROVEMENT CARDS ── */
+  .improve-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem;
+    border-left: 3px solid var(--accent);
+  }
+  .improve-title { font-weight: 700; margin-bottom: .5rem; color: var(--accent); }
+  .improve-list { color: var(--muted); font-size: .88rem; padding-left: 1.25rem; }
+  .improve-list li { margin-bottom: .3rem; }
+
+  footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">🔀 AI Gateway</span>
+  <div class="nav-links">
+    <a href="#architecture">Architecture</a>
+    <a href="#requestflow">Request Flow</a>
+    <a href="#config">Config</a>
+    <a href="#db">DB Layer</a>
+    <a href="#middleware">Middleware</a>
+    <a href="#proxy">Proxy</a>
+    <a href="#repository">Repository</a>
+    <a href="#service">Service</a>
+    <a href="#handlers">Handlers</a>
+    <a href="#ai">AI Layer</a>
+    <a href="#entrypoints">Entrypoints</a>
+    <a href="#migrations">Migrations</a>
+    <a href="#docker">Docker</a>
+    <a href="#api">API Reference</a>
+    <a href="#testing">Testing</a>
+    <a href="#improvements">Improvements</a>
+  </div>
+</nav>
+
+<div class="wrapper">
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>AI-Powered API Gateway</h1>
+    <p>A production-grade reverse proxy with JWT/API-key authentication, Redis sliding-window rate limiting, and AI-powered anomaly detection powered by Claude.</p>
+    <div class="badges">
+      <span class="badge badge-go">Go 1.22+</span>
+      <span class="badge badge-pg">PostgreSQL 16</span>
+      <span class="badge badge-redis">Redis 7</span>
+      <span class="badge badge-ai">Anthropic Claude</span>
+      <span class="badge badge-docker">Docker</span>
+    </div>
+  </div>
+
+  <!-- ARCHITECTURE OVERVIEW -->
+  <section id="architecture">
+    <div class="section-title">
+      <div class="section-icon icon-arch">🏗️</div>
+      System Architecture
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-title">What this system does</div>
+      Every HTTP request from an external client passes through the gateway. The gateway checks who you are (auth), whether you've sent too many requests (rate limit), then forwards you to the right upstream service (proxy). After proxying, it asynchronously submits the request to an AI analysis queue. A separate worker process dequeues jobs, detects anomalies, calls the Claude API, and stores alerts in PostgreSQL.
+    </div>
+
+    <!-- Layer diagram -->
+    <div class="arch-layers">
+      <div class="arch-layer" style="border-color:rgba(248,129,102,.4);background:rgba(248,129,102,.04)">
+        <span class="arch-layer-label" style="color:#f78166">🌐 Clients</span>
+        <div class="arch-layer-items">
+          <span class="arch-layer-tag">Browser / Mobile</span>
+          <span class="arch-layer-tag">Service Accounts</span>
+          <span class="arch-layer-tag">Admin CLI</span>
+        </div>
+      </div>
+      <div class="arch-layer" style="border-color:rgba(88,166,255,.4);background:rgba(88,166,255,.04)">
+        <span class="arch-layer-label" style="color:#58a6ff">🔀 Gateway</span>
+        <div class="arch-layer-items">
+          <span class="arch-layer-tag">cmd/gateway</span>
+          <span class="arch-layer-tag">middleware/auth</span>
+          <span class="arch-layer-tag">middleware/ratelimit</span>
+          <span class="arch-layer-tag">middleware/logger</span>
+          <span class="arch-layer-tag">proxy/router</span>
+          <span class="arch-layer-tag">proxy/upstream</span>
+        </div>
+      </div>
+      <div class="arch-layer" style="border-color:rgba(63,185,80,.4);background:rgba(63,185,80,.04)">
+        <span class="arch-layer-label" style="color:#3fb950">📦 Repository</span>
+        <div class="arch-layer-items">
+          <span class="arch-layer-tag">APIKeyRepo → PostgreSQL</span>
+          <span class="arch-layer-tag">RouteRepo → PostgreSQL</span>
+          <span class="arch-layer-tag">LogRepo → PostgreSQL</span>
+          <span class="arch-layer-tag">AlertRepo → PostgreSQL</span>
+        </div>
+      </div>
+      <div class="arch-layer" style="border-color:rgba(188,140,255,.4);background:rgba(188,140,255,.04)">
+        <span class="arch-layer-label" style="color:#bc8cff">🤖 AI Worker</span>
+        <div class="arch-layer-items">
+          <span class="arch-layer-tag">cmd/worker</span>
+          <span class="arch-layer-tag">ai/detector (rules)</span>
+          <span class="arch-layer-tag">ai/analyzer (Claude API)</span>
+          <span class="arch-layer-tag">asynq / Redis queue</span>
+        </div>
+      </div>
+      <div class="arch-layer" style="border-color:rgba(227,179,65,.4);background:rgba(227,179,65,.04)">
+        <span class="arch-layer-label" style="color:#e3b341">🗄️ Data stores</span>
+        <div class="arch-layer-items">
+          <span class="arch-layer-tag">PostgreSQL — truth of record</span>
+          <span class="arch-layer-tag">Redis — rate limit state + job queue</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- High-level flow -->
+    <div class="diagram">
+      <div class="flow">
+        <div class="flow-box accent1">Client<div class="flow-label">HTTP Request</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box accent2">Auth MW<div class="flow-label">JWT / X-API-Key</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box accent2">Rate Limit MW<div class="flow-label">Redis ZADD Lua</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box accent3">Proxy Router<div class="flow-label">Pattern match</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box accent4">Upstream<div class="flow-label">httputil.ReverseProxy</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box accent1">Response<div class="flow-label">+ Enqueue job</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box accent5">AI Worker<div class="flow-label">Detect → Claude</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REQUEST FLOW WALKTHROUGH -->
+  <section id="requestflow">
+    <div class="section-title">
+      <div class="section-icon icon-flow">🔄</div>
+      Step-by-Step Request Flow
+    </div>
+
+    <div class="step-list">
+      <div class="step">
+        <div class="step-content">
+          <strong>Client sends HTTP request to <code>GET /api/your-service/endpoint</code></strong>
+          <p>The client must include either <code>Authorization: Bearer &lt;JWT&gt;</code> or <code>X-API-Key: gw_&lt;hex&gt;</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Auth Middleware (<code>middleware/auth.go</code>) intercepts</strong>
+          <p>If Bearer token → decode with HMAC-SHA256, extract <code>key_id</code> + <code>owner_id</code> from claims.<br>If X-API-Key → SHA-256 hash the raw key, look up <code>api_keys.key_hash</code> in PostgreSQL, check <code>is_active</code> and <code>expires_at</code>.<br>On success, inject both IDs into the request context.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Rate Limiter Middleware (<code>middleware/ratelimit.go</code>) checks Redux quota</strong>
+          <p>Executes a Lua script atomically on Redis sorted set keyed <code>rate_limit:&lt;key_id&gt;</code>. Removes entries older than the window, counts remaining, adds current request if under limit or returns -1 (blocked). Sets <code>X-RateLimit-*</code> headers on the response.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Proxy Router (<code>proxy/router.go</code>) matches the request path</strong>
+          <p>Loads active routes from PostgreSQL via <code>RouteRepo.ListActive()</code>. Matches the URL path against each route's <code>path_pattern</code> using wildcard matching. Also checks the HTTP method against the route's <code>allowed_methods</code> list. Returns the matching <code>ProxyRoute</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Upstream Proxy (<code>proxy/upstream.go</code>) forwards the request</strong>
+          <p>Creates an <code>httputil.ReverseProxy</code> with a custom Director that rewrites the URL to the route's <code>target_url</code>, optionally strips the path prefix, applies a per-route timeout, and removes internal headers (X-API-Key, Authorization) before forwarding.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Gateway wraps the ResponseWriter to capture status code</strong>
+          <p>A thin <code>statusWriter</code> struct wraps <code>http.ResponseWriter</code> and intercepts <code>WriteHeader()</code> to record what status code the upstream returned.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Gateway enqueues an async analysis job</strong>
+          <p>After the upstream responds, calls <code>ai.EnqueueAnalysis()</code> with an <code>AnalyzePayload</code> containing API key ID, route ID, method, path, status code, latency, and IP. This serialises to JSON and pushes to the asynq <code>default</code> queue in Redis. This is fire-and-forget; if Redis is unavailable the error is swallowed so the client is never penalised.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <strong>Worker dequeues job (<code>ai/worker.go</code>): HandleAnalyzeTask</strong>
+          <p><strong>Step a</strong>: deserialise the JSON payload.<br><strong>Step b</strong>: call <code>LogRepo.Insert()</code> to persist the request to <code>request_logs</code>.<br><strong>Step c</strong>: call <code>Detector.Evaluate()</code>; if no rule fires, exit early.<br><strong>Step d</strong>: if a rule fires, call <code>Analyzer.Analyze()</code> (Claude API).<br><strong>Step e</strong>: call <code>AlertRepo.Insert()</code>; if <code>auto_blocked=true</code> also disables the API key in the same DB transaction.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONFIG -->
+  <section id="config">
+    <div class="section-title">
+      <div class="section-icon icon-pkg">⚙️</div>
+      internal/config/config.go
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-file">internal/config/config.go</span>
+        <span class="card-title">Application Configuration</span>
+      </div>
+      <p class="card-desc">Reads all environment variables at startup using <code>godotenv</code> to load a <code>.env</code> file. Crashes immediately if any required variable is missing (fail-fast). Exposes a single <code>*Config</code> struct to the rest of the application.</p>
+      <table>
+        <tr><th>Function</th><th>What it does</th></tr>
+        <tr><td>Load()</td><td>Loads <code>.env</code>, populates and returns a <code>*Config</code>. Called once in <code>main()</code>.</td></tr>
+        <tr><td>getRequired(key)</td><td>Returns the env var or calls <code>log.Fatalf</code> — process dies immediately.</td></tr>
+        <tr><td>getOrDefault(key, def)</td><td>Returns env var or the supplied default string.</td></tr>
+        <tr><td>getIntOrDefault(key, def)</td><td>Returns integer env var or default; panics if the value is not a valid integer.</td></tr>
+      </table>
+      <div class="curl-title">Environment Variables</div>
+      <table>
+        <tr><th>Key</th><th>Example</th><th>Purpose</th></tr>
+        <tr><td class="env-key">APP_PORT</td><td class="env-val">8080</td><td>HTTP server listen port</td></tr>
+        <tr><td class="env-key">APP_ENV</td><td class="env-val">development</td><td>Environment label for logs</td></tr>
+        <tr><td class="env-key">DATABASE_URL</td><td class="env-val">postgres://gateway:secret@127.0.0.1:5433/gateway_db?sslmode=disable</td><td>PostgreSQL connection string</td></tr>
+        <tr><td class="env-key">REDIS_URL</td><td class="env-val">redis://127.0.0.1:6379</td><td>Full URL for go-redis client</td></tr>
+        <tr><td class="env-key">JWT_SECRET</td><td class="env-val">my-secret-min-32-chars</td><td>HMAC key for JWT signature verification</td></tr>
+        <tr><td class="env-key">ADMIN_API_KEY</td><td class="env-val">my-admin-key</td><td>Static key for the admin API (X-Admin-Key header)</td></tr>
+        <tr><td class="env-key">ANTHROPIC_API_KEY</td><td class="env-val">sk-ant-xxx</td><td>Claude API key</td></tr>
+        <tr><td class="env-key">ANTHROPIC_MODEL</td><td class="env-val">claude-sonnet-4-6</td><td>Which Claude model to call</td></tr>
+        <tr><td class="env-key">RATE_LIMIT_DEFAULT_RPM</td><td class="env-val">60</td><td>Requests per minute allowed per API key</td></tr>
+        <tr><td class="env-key">RATE_LIMIT_WINDOW_SECONDS</td><td class="env-val">60</td><td>Sliding window size in seconds</td></tr>
+      </table>
+      <div class="callout callout-warn" style="margin-top:1rem">
+        <div class="callout-title">⚠️ RedisAddr is auto-derived</div>
+        <code>cfg.RedisAddr</code> is not in the .env — it's automatically computed by stripping the <code>redis://</code> scheme from <code>REDIS_URL</code>. <code>go-redis</code> uses the full URL; <code>asynq</code> uses the bare <code>host:port</code>.
+      </div>
+    </div>
+  </section>
+
+  <!-- DB LAYER -->
+  <section id="db">
+    <div class="section-title">
+      <div class="section-icon icon-pkg">🗄️</div>
+      internal/db — Database Connections
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><span class="card-file">db/postgres.go</span></div>
+        <p class="card-desc">Creates and verifies a <code>pgxpool.Pool</code> — a connection pool to PostgreSQL using the high-performance pgx v5 driver.</p>
+        <table>
+          <tr><th>Function</th><th>What it does</th></tr>
+          <tr><td>NewPool(url)</td><td>Parses config URL, sets pool limits (min=2, max=10, idle=30min), pings the DB to verify connectivity, returns the pool or an error.</td></tr>
+        </table>
+        <p style="color:var(--muted);font-size:.85rem;margin-top:.75rem">The pool is shared across all repository types. pgxpool is safe for concurrent use across goroutines.</p>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-file">db/redis.go</span></div>
+        <p class="card-desc">Creates a Redis client and defines the sliding-window Lua script used by the rate limiter.</p>
+        <table>
+          <tr><th>Function</th><th>What it does</th></tr>
+          <tr><td>NewRedisClient(url)</td><td>Parses <code>redis://</code> URL via <code>redis.ParseURL</code>, creates client, pings Redis. Returns the client or an error.</td></tr>
+          <tr><td>SlidingWindowScript</td><td>A pre-loaded Redis Lua script: removes outdated sorted-set members, counts current, adds if under limit, returns count or -1.</td></tr>
+        </table>
+        <div class="callout callout-info" style="margin-top:.75rem">
+          <div class="callout-title">Why Lua?</div>
+          Redis executes Lua scripts atomically — no race condition between checking the count and adding the new request. This is the correct way to implement sliding-window rate limiting.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MIDDLEWARE -->
+  <section id="middleware">
+    <div class="section-title">
+      <div class="section-icon icon-pkg">🛡️</div>
+      internal/middleware — HTTP Middleware Chain
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-file">middleware/auth.go</span><span class="card-title">Authentication</span></div>
+      <p class="card-desc">The most critical middleware. Validates identity using either a JWT (user clients) or a raw API key (service-to-service). On success, injects key ID and owner ID into the request context for downstream use.</p>
+      <table>
+        <tr><th>Function / Type</th><th>What it does</th></tr>
+        <tr><td>AuthMiddleware</td><td>Struct holding <code>jwtSecret []byte</code> and <code>*APIKeyRepo</code>.</td></tr>
+        <tr><td>NewAuth(secret, repo)</td><td>Constructor. Called once in <code>main()</code>.</td></tr>
+        <tr><td>Handle(next)</td><td>The middleware function. Tries Bearer JWT first, then <code>X-API-Key</code>. Returns 401 if neither validates.</td></tr>
+        <tr><td>validateJWT(token)</td><td>Decodes and verifies HS256 JWT signature against <code>jwtSecret</code>. Extracts <code>key_id</code> and <code>owner_id</code> from claims map.</td></tr>
+        <tr><td>validateAPIKey(ctx, raw)</td><td>SHA-256 hashes the raw key string (so plaintext is never compared), calls <code>APIKeyRepo.FindByHash()</code>, checks <code>IsActive</code>. Returns IDs on success.</td></tr>
+        <tr><td>ContextKeyAPIKeyID</td><td>Type-safe context key for the API key UUID — used downstream by the rate limiter and gateway to identify the caller.</td></tr>
+        <tr><td>ContextKeyOwnerID</td><td>Type-safe context key for the owner identifier.</td></tr>
+      </table>
+      <pre><span class="cm">// Security design: the raw API key is NEVER stored or logged.</span>
+<span class="cm">// Only its SHA-256 hash lives in the database.</span>
+hash := sha256.Sum256([]byte(rawKey))
+keyHash := hex.EncodeToString(hash[:])
+key, err := m.apiKeyRepo.FindByHash(ctx, keyHash)</pre>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-file">middleware/ratelimit.go</span><span class="card-title">Rate Limiting</span></div>
+      <p class="card-desc">Implements a sliding-window rate limiter using Redis sorted sets. Limits requests by API key ID, sets informational headers, and fails open (lets requests through) if Redis is down.</p>
+      <table>
+        <tr><th>Function</th><th>What it does</th></tr>
+        <tr><td>NewRateLimiter(redis, rpm, winSec)</td><td>Constructor. Takes the Redis client, default requests-per-minute, and window size.</td></tr>
+        <tr><td>Handle(next)</td><td>Extracts key ID from context, calls <code>check()</code>, sets <code>X-RateLimit-*</code> headers, returns 429 if blocked.</td></tr>
+        <tr><td>check(ctx, keyID, limit)</td><td>Runs the <code>SlidingWindowScript</code> Lua script. Returns (allowed, currentCount, error).</td></tr>
+        <tr><td>max(a, b)</td><td>Simple int max helper (pre-Go 1.21 compatibility).</td></tr>
+      </table>
+      <pre><span class="cm">// Response headers set on every request (even allowed ones):</span>
+X-RateLimit-Limit: 60       <span class="cm">// your total quota</span>
+X-RateLimit-Remaining: 47   <span class="cm">// how many you have left</span>
+X-RateLimit-Window: 60      <span class="cm">// window size in seconds</span>
+Retry-After: 60             <span class="cm">// only on 429 responses</span></pre>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><span class="card-file">middleware/logger.go</span></div>
+        <p class="card-desc">Simple structured request logger that runs after the handler and logs method, path, status code, and latency.</p>
+        <table>
+          <tr><th>Function</th><th>What it does</th></tr>
+          <tr><td>Logger(next)</td><td>Wraps the ResponseWriter with <code>logWriter</code>, serves the request, then logs the result.</td></tr>
+          <tr><td>logWriter</td><td>Thin struct embedding <code>http.ResponseWriter</code>, intercepts <code>WriteHeader()</code> to capture the status code written by the handler.</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-file">middleware/admin.go</span></div>
+        <p class="card-desc">Guards the <code>/v1/admin</code> subtree. Any request without the correct <code>X-Admin-Key</code> header is immediately rejected with a 403.</p>
+        <table>
+          <tr><th>Function</th><th>What it does</th></tr>
+          <tr><td>AdminOnly(adminKey)</td><td>Returns a middleware factory. Checks <code>r.Header.Get("X-Admin-Key")</code> against the configured static key.</td></tr>
+        </table>
+        <div class="callout callout-warn" style="margin-top:.75rem">
+          <div class="callout-title">Note</div>
+          The admin key is a simple static secret. In production, consider replacing this with mTLS or token-based admin auth.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROXY -->
+  <section id="proxy">
+    <div class="section-title">
+      <div class="section-icon icon-pkg">🔀</div>
+      internal/proxy — Reverse Proxy Engine
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><span class="card-file">proxy/router.go</span></div>
+        <p class="card-desc">Loads active routes from the database and matches incoming requests to them using wildcard path patterns.</p>
+        <table>
+          <tr><th>Function</th><th>What it does</th></tr>
+          <tr><td>NewRouter(routeRepo)</td><td>Constructor. Holds a reference to the route repository.</td></tr>
+          <tr><td>Match(ctx, r)</td><td>Calls <code>routeRepo.ListActive()</code> to get all active routes. For each route, uses wildcard path matching and allowed-method checking. Returns the first matching route.</td></tr>
+        </table>
+        <div class="callout callout-info" style="margin-top:.75rem">
+          <div class="callout-title">Hot-Reload</div>
+          Routes are fetched on every request, which means you can add or modify routes via the admin API and they take effect immediately without restarting the gateway.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-file">proxy/upstream.go</span></div>
+        <p class="card-desc">Creates a configured <code>httputil.ReverseProxy</code> for a matched route that handles forwarding and header sanitisation.</p>
+        <table>
+          <tr><th>Function</th><th>What it does</th></tr>
+          <tr><td>NewUpstreamProxy(route)</td><td>Parses the target URL, creates a <code>ReverseProxy</code> with custom Director and Transport. Returns the proxy or an error if the URL is invalid.</td></tr>
+          <tr><td>Director func</td><td>Rewrites the request URL to point at the upstream target. If <code>StripPrefix=true</code>, removes the matched path prefix. Deletes sensitive headers before forwarding.</td></tr>
+          <tr><td>Transport</td><td>Custom <code>http.RoundTripper</code> with a <code>TimeoutMs</code>-controlled deadline — prevents slow upstreams from blocking gateway goroutines.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- REPOSITORY -->
+  <section id="repository">
+    <div class="section-title">
+      <div class="section-icon icon-pkg">📦</div>
+      internal/repository — Database Access Layer
+    </div>
+    <p style="color:var(--muted);margin-bottom:1.5rem">All repositories receive a <code>*pgxpool.Pool</code> from the constructor and execute typed, parameterised SQL queries via pgx v5. There is no ORM. UUIDs are cast to <code>::text</code> in SELECT queries for easy <code>string</code> scanning.</p>
+
+    <div class="card">
+      <div class="card-header"><span class="card-file">repository/apikey.go</span><span class="card-title">APIKeyRepo</span></div>
+      <table>
+        <tr><th>Function</th><th>What it does</th></tr>
+        <tr><td>NewAPIKeyRepo(pool)</td><td>Constructor.</td></tr>
+        <tr><td>FindByHash(ctx, hash)</td><td>Finds an active non-expired key by its SHA-256 hash. Returns <code>nil, nil</code> for not found. Called on every API-key authenticated request.</td></tr>
+        <tr><td>Create(ctx, ...)</td><td>INSERTs a new key row (name, owner, hash, scopes, RPM, expiry), returns the full persisted row.</td></tr>
+        <tr><td>List(ctx, page, limit)</td><td>Paginates the api_keys table ordered by newest first.</td></tr>
+        <tr><td>GetByID(ctx, id)</td><td>Fetches a single key by UUID.</td></tr>
+        <tr><td>SetActive(ctx, id, bool)</td><td>Enables or disables (soft-deletes) a key.</td></tr>
+        <tr><td>UpdateRateLimit(ctx, id, rpm)</td><td>Changes per-key rate limit — takes effect on the next request.</td></tr>
+      </table>
+      <pre><span class="cm">// APIKey struct</span>
+<span class="kw">type</span> <span class="ty">APIKey</span> <span class="kw">struct</span> {
+    ID           <span class="ty">string</span>
+    Name         <span class="ty">string</span>
+    OwnerID      <span class="ty">string</span>
+    KeyHash      <span class="ty">string</span>    <span class="cm">// json:"-" — never serialised</span>
+    Scopes       []<span class="ty">string</span>
+    RateLimitRPM <span class="ty">int</span>
+    IsActive     <span class="ty">bool</span>
+    ExpiresAt    *<span class="ty">time.Time</span>
+    CreatedAt    <span class="ty">time.Time</span>
+}</pre>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-file">repository/route.go</span><span class="card-title">RouteRepo</span></div>
+      <table>
+        <tr><th>Function</th><th>What it does</th></tr>
+        <tr><td>ListActive(ctx)</td><td>Returns all <code>is_active=true</code> routes. Called by <code>proxy/router.go</code> on every proxied request.</td></tr>
+        <tr><td>List(ctx)</td><td>Returns all routes (including inactive) for the admin API.</td></tr>
+        <tr><td>GetByID(ctx, id)</td><td>Fetches a single route by UUID.</td></tr>
+        <tr><td>Create(ctx, ...)</td><td>INSERT with RETURNING. Creates a route and returns the DB-generated record.</td></tr>
+        <tr><td>Update(ctx, id, ...)</td><td>Full UPDATE with RETURNING. The handler fetches existing values first to fill any missing fields.</td></tr>
+        <tr><td>Delete(ctx, id)</td><td>Hard delete from proxy_routes table.</td></tr>
+        <tr><td>GetStats(ctx, id, since)</td><td>Aggregates total requests, error count, and p99 latency from <code>request_logs</code> for a route.</td></tr>
+      </table>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><span class="card-file">repository/logrepo.go</span></div>
+        <table>
+          <tr><th>Function</th><th>What it does</th></tr>
+          <tr><td>Insert(ctx, LogEntry)</td><td>Writes one request row to <code>request_logs</code>. Uses <code>NULLIF($2,'')::uuid</code> so an empty RouteID inserts as NULL.</td></tr>
+          <tr><td>GetStats(ctx, apiKeyID, since)</td><td>Aggregates <code>COUNT</code>, error count, <code>COUNT(DISTINCT ip)</code> for the AI detector. Computes error rate and RPM in Go.</td></tr>
+          <tr><td>GetKeyStats(ctx, ...)</td><td>Admin API stats: total, errors, p99 latency using <code>PERCENTILE_CONT</code>.</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-file">repository/alertrepo.go</span></div>
+        <table>
+          <tr><th>Function</th><th>What it does</th></tr>
+          <tr><td>Insert(ctx, ...)</td><td>Transactional: inserts alert, optionally disables the API key in the same transaction if <code>autoBlock=true</code>.</td></tr>
+          <tr><td>List(ctx, severity, resolved)</td><td>Dynamic WHERE clause based on optional severity filter and resolved flag.</td></tr>
+          <tr><td>GetByID(ctx, id)</td><td>Fetch a single alert for the admin API.</td></tr>
+          <tr><td>Resolve(ctx, id, reEnableKey)</td><td>Transactional: sets <code>resolved_at=NOW()</code>, optionally re-enables the API key.</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-file">repository/log.go</span><span class="card-title">Shared Types</span></div>
+      <pre><span class="kw">type</span> <span class="ty">LogEntry</span> <span class="kw">struct</span> {
+    APIKeyID   <span class="ty">string</span>
+    RouteID    <span class="ty">string</span>
+    Method     <span class="ty">string</span>
+    Path       <span class="ty">string</span>
+    StatusCode <span class="ty">int</span>
+    LatencyMs  <span class="ty">int</span>
+    IPAddress  <span class="ty">string</span>
+}
+
+<span class="kw">type</span> <span class="ty">AnomalyAlert</span> <span class="kw">struct</span> {
+    ID, APIKeyID, Severity, TriggerType, AIExplanation <span class="ty">string</span>
+    AutoBlocked   <span class="ty">bool</span>
+    ResolvedAt    *<span class="ty">time.Time</span>
+    CreatedAt     <span class="ty">time.Time</span>
+}</pre>
+      <p style="color:var(--muted);font-size:.88rem">These types live in the repository package. The AI package imports repository to use <code>LogEntry</code> in <code>HandleAnalyzeTask</code> — there is no circular import because repository does not import ai.</p>
+    </div>
+  </section>
+
+  <!-- SERVICE LAYER -->
+  <section id="service">
+    <div class="section-title">
+      <div class="section-icon icon-pkg">⚡</div>
+      internal/service — Business Logic
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-file">service/apikey.go</span><span class="card-title">APIKeyService</span></div>
+      <p class="card-desc">Sits between handler and repository. Responsible for generating cryptographically-secure API keys before storing them.</p>
+      <table>
+        <tr><th>Function</th><th>What it does</th></tr>
+        <tr><td>NewAPIKeyService(repo)</td><td>Constructor.</td></tr>
+        <tr><td>Create(ctx, input)</td><td>1) generates 32 random bytes → hex encoded → prefixed with <code>gw_</code>. 2) SHA-256 hashes the raw key. 3) calls <code>APIKeyRepo.Create()</code> with the hash. 4) returns both the raw key (for one-time display) and the persisted <code>APIKey</code> record.</td></tr>
+      </table>
+      <pre><span class="cm">// Key format: gw_ + 64 hex chars = 67 chars total</span>
+<span class="cm">// Example:    gw_a3f7b2...c8d1</span>
+<span class="cm">// Only the SHA-256 hash of this goes in the DB.</span>
+raw := <span class="fn">make</span>([]<span class="ty">byte</span>, 32)
+rand.<span class="fn">Read</span>(raw)
+rawKey := <span class="st">"gw_"</span> + hex.<span class="fn">EncodeToString</span>(raw)
+sum := sha256.<span class="fn">Sum256</span>([]<span class="ty">byte</span>(rawKey))
+keyHash := hex.<span class="fn">EncodeToString</span>(sum[:])</pre>
+    </div>
+  </section>
+
+  <!-- HANDLERS -->
+  <section id="handlers">
+    <div class="section-title">
+      <div class="section-icon icon-api">🎯</div>
+      internal/handler — Admin HTTP Handlers
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-file">handler/keys.go</span><span class="card-title">KeyHandler</span></div>
+      <p class="card-desc">Serves the admin API for API key management. Uses <code>APIKeyService</code> for creation and <code>APIKeyRepo</code> directly for reads/updates.</p>
+      <table>
+        <tr><th>Handler</th><th>Route</th><th>What it does</th></tr>
+        <tr><td>Create</td><td><span class="method POST">POST</span> /v1/admin/keys</td><td>Calls <code>svc.Create()</code>. Returns raw key once. Body: <code>{"name","owner_id","scopes","rate_limit_rpm","expires_at"}</code>.</td></tr>
+        <tr><td>List</td><td><span class="method GET">GET</span> /v1/admin/keys</td><td>Paginates keys. Query params: <code>?page=1&amp;limit=20</code>.</td></tr>
+        <tr><td>Get</td><td><span class="method GET">GET</span> /v1/admin/keys/{id}</td><td>Fetches a single key. Returns 404 if not found.</td></tr>
+        <tr><td>Update</td><td><span class="method PATCH">PATCH</span> /v1/admin/keys/{id}</td><td>Patches <code>rate_limit_rpm</code> and/or <code>is_active</code>.</td></tr>
+        <tr><td>Delete</td><td><span class="method DELETE">DELETE</span> /v1/admin/keys/{id}</td><td>Soft-revokes by setting <code>is_active=false</code>. The key hash stays in DB for audit.</td></tr>
+        <tr><td>Stats</td><td><span class="method GET">GET</span> /v1/admin/keys/{id}/stats</td><td>Returns usage stats. Query param: <code>?hours=24</code>.</td></tr>
+      </table>
+      <p style="color:var(--muted);font-size:.85rem;margin-top:.75rem">Also defines <code>writeJSON(w, status, v)</code> and <code>errBody(msg)</code> helper functions shared across all handlers in the package.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><span class="card-file">handler/routes.go</span><span class="card-title">RouteHandler</span></div>
+        <table>
+          <tr><th>Handler</th><th>Route</th></tr>
+          <tr><td>List</td><td><span class="method GET">GET</span> /v1/admin/routes</td></tr>
+          <tr><td>Create</td><td><span class="method POST">POST</span> /v1/admin/routes</td></tr>
+          <tr><td>Update</td><td><span class="method PUT">PUT</span> /v1/admin/routes/{id}</td></tr>
+          <tr><td>Delete</td><td><span class="method DELETE">DELETE</span> /v1/admin/routes/{id}</td></tr>
+        </table>
+        <p style="color:var(--muted);font-size:.85rem;margin-top:.75rem">The PUT handler fetches the existing route first to use as defaults for any omitted fields — enabling safe partial updates.</p>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-file">handler/alerts.go</span><span class="card-title">AlertHandler</span></div>
+        <table>
+          <tr><th>Handler</th><th>Route</th></tr>
+          <tr><td>List</td><td><span class="method GET">GET</span> /v1/admin/alerts?severity=HIGH&amp;resolved=false</td></tr>
+          <tr><td>Get</td><td><span class="method GET">GET</span> /v1/admin/alerts/{id}</td></tr>
+          <tr><td>Resolve</td><td><span class="method PATCH">PATCH</span> /v1/admin/alerts/{id}/resolve?re_enable_key=true</td></tr>
+        </table>
+        <p style="color:var(--muted);font-size:.85rem;margin-top:.75rem"><code>?re_enable_key=true</code> re-enables the API key that was auto-blocked when the alert was created.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI LAYER -->
+  <section id="ai">
+    <div class="section-title">
+      <div class="section-icon icon-pkg">🤖</div>
+      internal/ai — Anomaly Detection + Claude Analysis
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-file">ai/worker.go</span><span class="card-title">Task Worker + Enqueue</span></div>
+      <p class="card-desc">Defines the asynq task name, <code>AnalyzePayload</code> struct, the <code>Worker</code> that handles tasks, and the <code>EnqueueAnalysis</code> helper used by the gateway.</p>
+      <table>
+        <tr><th>Function</th><th>What it does</th></tr>
+        <tr><td>NewWorker(detector, analyzer, alertRepo, logRepo)</td><td>Constructor. Builds the Worker that orchestrates the full analysis pipeline.</td></tr>
+        <tr><td>HandleAnalyzeTask(ctx, task)</td><td>asynq task handler. Unmarshals JSON payload, calls LogRepo.Insert, Detector.Evaluate, Analyzer.Analyze (if rules fire), AlertRepo.Insert. Max 3 retries.</td></tr>
+        <tr><td>EnqueueAnalysis(client, payload)</td><td>Serialises <code>AnalyzePayload</code> to JSON and pushes to the <code>default</code> asynq queue. Called synchronously in the gateway after proxying.</td></tr>
+      </table>
+      <pre><span class="kw">type</span> <span class="ty">AnalyzePayload</span> <span class="kw">struct</span> {
+    APIKeyID   <span class="ty">string</span>  <span class="cm">// which key made the request</span>
+    RouteID    <span class="ty">string</span>  <span class="cm">// which route was matched</span>
+    RequestID  <span class="ty">string</span>  <span class="cm">// chi request ID for correlation</span>
+    Path       <span class="ty">string</span>
+    Method     <span class="ty">string</span>
+    StatusCode <span class="ty">int</span>    <span class="cm">// captured by statusWriter</span>
+    LatencyMs  <span class="ty">int</span>
+    IPAddress  <span class="ty">string</span> <span class="cm">// extracted IP (port stripped)</span>
+}</pre>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-file">ai/detector.go</span><span class="card-title">Rule-Based Anomaly Detector</span></div>
+      <p class="card-desc">First-stage detection without any external API call. Inspects aggregated statistics from the last window and fires signals when thresholds are crossed.</p>
+      <table>
+        <tr><th>Function</th><th>What it does</th></tr>
+        <tr><td>NewDetector(logRepo)</td><td>Constructor. Holds a reference to LogRepo to query historical stats.</td></tr>
+        <tr><td>Evaluate(ctx, apiKeyID)</td><td>Calls <code>logRepo.GetStats()</code> for a rolling 5-minute window. Checks three rules in order. Returns a <code>DetectionSignal</code>.</td></tr>
+      </table>
+      <div class="curl-title">Detection Rules (all configurable)</div>
+      <table>
+        <tr><th>Rule</th><th>Threshold</th><th>TriggerType</th></tr>
+        <tr><td>Request Burst</td><td>&gt;1000 requests in 5 minutes</td><td><code>high_request_volume</code></td></tr>
+        <tr><td>Error Spike</td><td>Error rate &gt;50%</td><td><code>high_error_rate</code></td></tr>
+        <tr><td>IP Scatter Scan</td><td>Requests from &gt;50 unique IPs</td><td><code>unusual_ip_distribution</code></td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-file">ai/analyzer.go</span><span class="card-title">Claude API Analysis</span></div>
+      <p class="card-desc">Second-stage analysis. Only called when the rule-based detector fires. Sends traffic stats to Claude via the Anthropic API and expects a structured JSON response with severity and explanation.</p>
+      <table>
+        <tr><th>Function</th><th>What it does</th></tr>
+        <tr><td>NewAnalyzer(apiKey, model)</td><td>Constructor. Configures the Anthropic HTTP client.</td></tr>
+        <tr><td>Analyze(ctx, apiKeyID, signal)</td><td>Builds a prompt with request stats, calls the Claude API, parses the JSON response into <code>AnalysisResult</code>.</td></tr>
+      </table>
+      <pre><span class="cm">// Claude response format expected:</span>
+{
+  <span class="st">"severity"</span>:    <span class="st">"HIGH"</span>,      <span class="cm">// LOW | MEDIUM | HIGH | CRITICAL</span>
+  <span class="st">"explanation"</span>: <span class="st">"Burst of..."</span>,
+  <span class="st">"auto_block"</span>:  <span class="kw">false</span>         <span class="cm">// whether to immediately revoke the key</span>
+}</pre>
+      <div class="callout callout-info" style="margin-top:.75rem">
+        <div class="callout-title">Fault tolerance</div>
+        If the Claude API call fails (network error, quota exceeded, etc.), the worker falls back to creating a <code>MEDIUM</code> rule-only alert instead of returning an error. The log entry is always persisted regardless.
+      </div>
+    </div>
+  </section>
+
+  <!-- ENTRYPOINTS -->
+  <section id="entrypoints">
+    <div class="section-title">
+      <div class="section-icon icon-pkg">🚀</div>
+      cmd/ — Binary Entrypoints
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><span class="card-file">cmd/gateway/main.go</span></div>
+        <p class="card-desc">The HTTP gateway binary. Wires everything together and starts the HTTP server.</p>
+        <p style="color:var(--muted);font-size:.85rem"><strong>Startup sequence:</strong></p>
+        <ol style="color:var(--muted);font-size:.85rem;padding-left:1.25rem;margin-top:.5rem">
+          <li>Load config from .env</li>
+          <li>Open PostgreSQL pool</li>
+          <li>Open Redis client</li>
+          <li>Create all repositories</li>
+          <li>Create asynq client</li>
+          <li>Create auth + rate limit middleware</li>
+          <li>Create admin handlers</li>
+          <li>Build chi router with all routes</li>
+          <li>Start <code>http.ListenAndServe</code></li>
+        </ol>
+        <p style="color:var(--muted);font-size:.85rem;margin-top:.75rem">Also defines <code>statusWriter</code> (response wrapper) and <code>extractIP()</code> (strips port from RemoteAddr).</p>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-file">cmd/worker/main.go</span></div>
+        <p class="card-desc">The background AI analysis worker binary. Runs as a separate process consuming jobs from Redis.</p>
+        <p style="color:var(--muted);font-size:.85rem"><strong>Startup sequence:</strong></p>
+        <ol style="color:var(--muted);font-size:.85rem;padding-left:1.25rem;margin-top:.5rem">
+          <li>Load config from .env</li>
+          <li>Open PostgreSQL pool</li>
+          <li>Create LogRepo + AlertRepo</li>
+          <li>Create Detector + Analyzer</li>
+          <li>Create Worker (assembles the pipeline)</li>
+          <li>Start asynq server (concurrency=5)</li>
+          <li>Register <code>HandleAnalyzeTask</code> handler</li>
+          <li>Block on <code>srv.Run(mux)</code></li>
+        </ol>
+        <p style="color:var(--muted);font-size:.85rem;margin-top:.75rem">Shuts down gracefully on SIGTERM / SIGINT — asynq handles this internally.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MIGRATIONS -->
+  <section id="migrations">
+    <div class="section-title">
+      <div class="section-icon icon-pkg">🗃️</div>
+      migrations/ — Database Schema
+    </div>
+    <div class="card">
+      <table>
+        <tr><th>Migration</th><th>Creates</th><th>Key columns</th></tr>
+        <tr>
+          <td>000001_create_api_keys</td>
+          <td><code>api_keys</code></td>
+          <td><code>id UUID</code>, <code>key_hash VARCHAR(64) UNIQUE</code>, <code>scopes TEXT[]</code>, <code>rate_limit_rpm INT</code>, <code>is_active BOOL</code>, <code>expires_at TIMESTAMPTZ</code></td>
+        </tr>
+        <tr>
+          <td>000002_create_proxy_routes</td>
+          <td><code>proxy_routes</code></td>
+          <td><code>path_pattern VARCHAR(255) UNIQUE</code>, <code>target_url VARCHAR(500)</code>, <code>allowed_methods TEXT[]</code>, <code>strip_prefix BOOL</code>, <code>timeout_ms INT</code></td>
+        </tr>
+        <tr>
+          <td>000003_create_logs_alerts</td>
+          <td><code>request_logs</code>, <code>anomaly_alerts</code>, <code>alert_severity ENUM</code></td>
+          <td>Logs: <code>api_key_id FK</code>, <code>route_id FK</code>, <code>status_code</code>, <code>latency_ms</code>, <code>ip_address INET</code>. Alerts: <code>severity alert_severity</code>, <code>auto_blocked</code>, <code>resolved_at</code></td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- DOCKER -->
+  <section id="docker">
+    <div class="section-title">
+      <div class="section-icon icon-pkg">🐳</div>
+      docker/ — Containerization
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><span class="card-file">docker/Dockerfile</span></div>
+        <p class="card-desc">Multi-stage build producing two minimal scratch-based images from a single file using build targets.</p>
+        <table>
+          <tr><th>Stage</th><th>What it does</th></tr>
+          <tr><td>builder</td><td>Go 1.22 Alpine: installs CA certs, downloads modules, builds both <code>gateway</code> and <code>worker</code> binaries with <code>-s -w</code> (stripped, no debug info).</td></tr>
+          <tr><td>gateway</td><td>Scratch image: only the gateway binary + CA certs. EXPOSE 8080. Final image is ~10MB.</td></tr>
+          <tr><td>worker</td><td>Scratch image: only the worker binary + CA certs. Needs CA certs to call Claude API over HTTPS.</td></tr>
+        </table>
+        <pre>docker build --target gateway -t ai-gateway .
+docker build --target worker  -t ai-worker  .</pre>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-file">docker/docker-compose.yml</span></div>
+        <table>
+          <tr><th>Service</th><th>Port</th><th>Role</th></tr>
+          <tr><td>postgres</td><td>5433→5432</td><td>Primary data store. Has healthcheck, named volume.</td></tr>
+          <tr><td>redis</td><td>6379</td><td>Rate limit counters + asynq job queue.</td></tr>
+          <tr><td>gateway</td><td>8080</td><td>HTTP gateway. Depends on postgres+redis being healthy.</td></tr>
+          <tr><td>worker</td><td>(none)</td><td>Background AI analysis worker.</td></tr>
+          <tr><td>asynqmon</td><td>8081</td><td>Asynq monitoring dashboard UI (view queue health, failed jobs).</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- API REFERENCE -->
+  <section id="api">
+    <div class="section-title">
+      <div class="section-icon icon-api">📋</div>
+      API Reference + curl Examples
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Create an API Key</span></div>
+      <pre>curl -X POST http://localhost:8080/v1/admin/keys \
+  -H "X-Admin-Key: your-admin-key-for-managing-gateway" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My Service",
+    "owner_id": "user_123",
+    "scopes": ["read", "write"],
+    "rate_limit_rpm": 120
+  }'
+
+<span class="cm"># Response (save the "key" — shown only once!):</span>
+{
+  "key": "gw_a3f7b2c8...",
+  "details": { "id": "uuid", "name": "My Service", "is_active": true, ... }
+}</pre>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Create a Proxy Route</span></div>
+      <pre>curl -X POST http://localhost:8080/v1/admin/routes \
+  -H "X-Admin-Key: your-admin-key-for-managing-gateway" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "JSONPlaceholder API",
+    "path_pattern": "/api/posts/*",
+    "target_url": "https://jsonplaceholder.typicode.com",
+    "allowed_methods": ["GET", "POST"],
+    "strip_prefix": true,
+    "timeout_ms": 5000
+  }'</pre>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Make a Proxied Request</span></div>
+      <pre><span class="cm"># Using raw API key:</span>
+curl http://localhost:8080/api/posts/1 \
+  -H "X-API-Key: gw_a3f7b2c8..."
+
+<span class="cm"># Using JWT Bearer token:</span>
+curl http://localhost:8080/api/posts/1 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
+
+<span class="cm"># Check rate limit headers in response:</span>
+X-RateLimit-Limit: 120
+X-RateLimit-Remaining: 119
+X-RateLimit-Window: 60</pre>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><span class="card-title">List Anomaly Alerts</span></div>
+        <pre>curl "http://localhost:8080/v1/admin/alerts?severity=HIGH&resolved=false" \
+  -H "X-Admin-Key: your-admin-key-for-managing-gateway"</pre>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Resolve an Alert + Re-Enable Key</span></div>
+        <pre>curl -X PATCH \
+  "http://localhost:8080/v1/admin/alerts/{alert-id}/resolve?re_enable_key=true" \
+  -H "X-Admin-Key: your-admin-key-for-managing-gateway"</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Generate a JWT for Testing</span></div>
+      <pre><span class="cm"># Quick Go snippet to generate a test JWT:</span>
+<span class="kw">import</span> jwt <span class="st">"github.com/golang-jwt/jwt/v5"</span>
+
+token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+    <span class="st">"key_id"</span>:   <span class="st">"your-api-key-uuid"</span>,
+    <span class="st">"owner_id"</span>: <span class="st">"user_123"</span>,
+    <span class="st">"exp"</span>:      time.Now().Add(24 * time.Hour).Unix(),
+})
+signed, _ := token.SignedString([]byte(<span class="st">"JWT_SECRET from .env"</span>))</pre>
+    </div>
+  </section>
+
+  <!-- TESTING -->
+  <section id="testing">
+    <div class="section-title">
+      <div class="section-icon icon-test">🧪</div>
+      Testing Guide
+    </div>
+
+    <div class="callout callout-success">
+      <div class="callout-title">✅ Quick Smoke Test (manual)</div>
+      <ol style="padding-left:1.25rem">
+        <li>Start infra: <code>docker compose -f docker/docker-compose.yml up postgres redis -d</code></li>
+        <li>Run migrations (see above)</li>
+        <li>Start gateway: <code>go run ./cmd/gateway</code> in Terminal 1</li>
+        <li>Start worker: <code>go run ./cmd/worker</code> in Terminal 2</li>
+        <li>Create a key via curl (above)</li>
+        <li>Create a route pointing to <code>https://jsonplaceholder.typicode.com</code></li>
+        <li>Make a request with the key — should get a real upstream response</li>
+        <li>Make 61+ requests in 60s to verify rate limiting (expect 429)</li>
+        <li>Check <code>http://localhost:8081</code> (asynqmon) to see processed jobs</li>
+      </ol>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Unit Testing — Rate Limiter</span></div>
+        <p class="card-desc">Use <code>miniredis</code> (already in go.mod) for in-memory Redis — no real Redis needed.</p>
+        <pre><span class="kw">import</span> (
+    <span class="st">"github.com/alicebob/miniredis/v2"</span>
+    <span class="st">"github.com/redis/go-redis/v9"</span>
+)
+
+<span class="kw">func</span> <span class="fn">TestRateLimiter</span>(t *testing.T) {
+    mr, _ := miniredis.Run()
+    rdb := redis.NewClient(&redis.Options{Addr: mr.Addr()})
+    rl := middleware.NewRateLimiter(rdb, 5, 60)
+    <span class="cm">// send 6 requests, expect 5 OK + 1 blocked</span>
+}</pre>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Unit Testing — Auth Middleware</span></div>
+        <pre><span class="kw">func</span> <span class="fn">TestAuthMiddleware_ValidJWT</span>(t *testing.T) {
+    secret := <span class="st">"test-secret-32-chars-minimum-len"</span>
+    token := <span class="cm">/* generate HS256 JWT */</span>
+
+    req := httptest.NewRequest(<span class="st">"GET"</span>, <span class="st">"/"</span>, nil)
+    req.Header.Set(<span class="st">"Authorization"</span>, <span class="st">"Bearer "</span>+token)
+    w := httptest.NewRecorder()
+
+    auth := middleware.NewAuth(secret, nil)
+    auth.Handle(http.HandlerFunc(<span class="kw">func</span>(w http.ResponseWriter, r *http.Request) {
+        <span class="cm">// assert context has key_id + owner_id</span>
+    })).ServeHTTP(w, req)
+}</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Integration Test — Full Proxy Flow</span></div>
+      <pre><span class="kw">func</span> <span class="fn">TestProxyFlow</span>(t *testing.T) {
+    <span class="cm">// 1. Start a test upstream server</span>
+    upstream := httptest.NewServer(http.HandlerFunc(<span class="kw">func</span>(w http.ResponseWriter, r *http.Request) {
+        w.WriteHeader(200)
+        w.Write([]byte(<span class="st">`{"hello":"world"}`</span>))
+    }))
+    defer upstream.Close()
+
+    <span class="cm">// 2. Create route pointing to the test upstream</span>
+    <span class="cm">// 3. Make request through the gateway</span>
+    <span class="cm">// 4. Assert response body and status code</span>
+    <span class="cm">// 5. Query request_logs table to verify persistence</span>
+}</pre>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Load Testing with k6</span></div>
+      <pre><span class="cm">// k6-load-test.js</span>
+<span class="kw">import</span> http <span class="kw">from</span> <span class="st">'k6/http'</span>;
+<span class="kw">export const</span> options = { vus: 100, duration: <span class="st">'30s'</span> };
+
+<span class="kw">export default function</span>() {
+    http.get(<span class="st">'http://localhost:8080/api/posts/1'</span>, {
+        headers: { <span class="st">'X-API-Key'</span>: <span class="st">'gw_your_key_here'</span> }
+    });
+}
+
+<span class="cm">// Run: k6 run k6-load-test.js</span>
+<span class="cm">// Expect: 429s after rate limit hits, p99 latency visible in asynqmon</span></pre>
+    </div>
+  </section>
+
+  <!-- IMPROVEMENTS -->
+  <section id="improvements">
+    <div class="section-title">
+      <div class="section-icon icon-perf">📈</div>
+      Improvements &amp; Fine-Tuning
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+      <div class="improve-card">
+        <div class="improve-title">🎯 Per-Key Rate Limits</div>
+        <p style="color:var(--muted);font-size:.88rem;margin-bottom:.5rem">Currently all keys share the default RPM. To support per-key limits:</p>
+        <ul class="improve-list">
+          <li>In <code>ratelimit.go</code>, look up <code>key.RateLimitRPM</code> from the context (requires storing it there in auth middleware)</li>
+          <li>Pass that as the <code>limit</code> to <code>check()</code> instead of <code>rl.defaultRPM</code></li>
+          <li>Update auth middleware to also set <code>ContextKeyRPM</code> from the DB record</li>
+        </ul>
+      </div>
+      <div class="improve-card" style="border-color:var(--accent3)">
+        <div class="improve-title" style="color:var(--accent3)">⚡ Route Caching</div>
+        <p style="color:var(--muted);font-size:.88rem;margin-bottom:.5rem"><code>RouteRepo.ListActive()</code> hits PostgreSQL on every request. At high traffic:</p>
+        <ul class="improve-list">
+          <li>Cache routes in Redis with a short TTL (5–10s)</li>
+          <li>Or cache in-process with an <code>atomic.Value</code> + background refresh goroutine</li>
+          <li>Invalidate on every admin PUT/DELETE to routes</li>
+        </ul>
+      </div>
+      <div class="improve-card" style="border-color:var(--accent2)">
+        <div class="improve-title" style="color:var(--accent2)">🤖 AI Detector Tuning</div>
+        <ul class="improve-list">
+          <li>Make thresholds configurable via env vars or a config table in PostgreSQL</li>
+          <li>Add more rules: unusual status code distribution, path scanning patterns, time-of-day anomalies</li>
+          <li>Tune detection window from 5min to 1min for tighter real-time detection</li>
+          <li>Add a confidence score to the Claude response and only block at &gt;80% confidence</li>
+        </ul>
+      </div>
+      <div class="improve-card" style="border-color:var(--accent5)">
+        <div class="improve-title" style="color:var(--accent5)">📊 Observability</div>
+        <ul class="improve-list">
+          <li>Expose Prometheus metrics using <code>prometheus/client_golang</code> (already in go.mod)</li>
+          <li>Track: request count per route, p99 latency, rate limit hit rate, alert count by severity</li>
+          <li>Add structured JSON logging with <code>go.uber.org/zap</code> (already in go.mod)</li>
+          <li>Add a <code>/metrics</code> endpoint and scrape with Prometheus + Grafana</li>
+        </ul>
+      </div>
+      <div class="improve-card" style="border-color:var(--accent4)">
+        <div class="improve-title" style="color:var(--accent4)">🔐 Security Hardening</div>
+        <ul class="improve-list">
+          <li>Rotate JWT secret without downtime using a two-secret window approach</li>
+          <li>Add request body size limits (<code>http.MaxBytesReader</code>)</li>
+          <li>Add IP allowlist/blocklist table</li>
+          <li>Replace static admin key with mTLS or short-lived admin JWTs</li>
+          <li>Log all admin actions to a separate audit table</li>
+        </ul>
+      </div>
+      <div class="improve-card">
+        <div class="improve-title">🧪 Test Coverage</div>
+        <ul class="improve-list">
+          <li>Unit tests for: auth middleware (JWT + API key), rate limiter (miniredis), detector rules, service key generation</li>
+          <li>Integration tests: full proxy round-trip with a test HTTP server upstream</li>
+          <li>Table-driven tests for all SQL queries using <code>pgxmock</code> or a test DB</li>
+          <li>Load test with k6 to verify rate limiting under concurrent load</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-warn" style="margin-top:1.5rem">
+      <div class="callout-title">⚠️ Production Checklist</div>
+      Before going to production:<br>
+      <ul style="padding-left:1.25rem;margin-top:.5rem">
+        <li>Set real <code>JWT_SECRET</code> (32+ chars, random)</li>
+        <li>Set real <code>ADMIN_API_KEY</code> and store it in a secrets manager</li>
+        <li>Set real <code>ANTHROPIC_API_KEY</code></li>
+        <li>Enable TLS on the gateway (put nginx or a load balancer in front)</li>
+        <li>Enable PostgreSQL SSL (<code>sslmode=require</code>)</li>
+        <li>Set <code>APP_ENV=production</code> to disable verbose debug logging</li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  AI-Powered API Gateway — Go + PostgreSQL + Redis + Anthropic Claude<br>
+  Generated documentation • All components are implemented and tested
+</footer>
+
+</body>
+</html>

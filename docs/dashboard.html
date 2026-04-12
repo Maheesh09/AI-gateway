@@ -1,0 +1,2294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Gateway — Admin</title>
+  <meta name="description"
+    content="Admin dashboard to manage API keys, proxy routes, and AI anomaly alerts for the AI Gateway system." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Geist:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0d10;
+      --bg2: #0f1218;
+      --bg3: #141820;
+      --bg4: #1a2030;
+      --line: #1e2535;
+      --line2: #28334a;
+      --teal: #2dd4bf;
+      --teal-dim: rgba(45, 212, 191, 0.08);
+      --teal-mid: rgba(45, 212, 191, 0.18);
+      --amber: #f59e0b;
+      --amber-dim: rgba(245, 158, 11, 0.08);
+      --red: #f43f5e;
+      --red-dim: rgba(244, 63, 94, 0.08);
+      --sky: #38bdf8;
+      --sky-dim: rgba(56, 189, 248, 0.08);
+      --violet: #a78bfa;
+      --violet-dim: rgba(167, 139, 250, 0.08);
+      --txt: #c9d1e0;
+      --txt2: #6b7a99;
+      --txt3: #3a4560;
+      --sans: 'Geist', system-ui, sans-serif;
+      --mono: 'IBM Plex Mono', monospace;
+      --r: 4px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--txt);
+      min-height: 100vh;
+      line-height: 1.55;
+      overflow-x: hidden;
+    }
+
+    /* Subtle scan-line texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg,
+          transparent,
+          transparent 2px,
+          rgba(255, 255, 255, 0.012) 2px,
+          rgba(255, 255, 255, 0.012) 4px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    input,
+    textarea,
+    select {
+      font-family: inherit;
+    }
+
+    /* ── LAYOUT ── */
+    .app {
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 220px;
+      min-width: 220px;
+      background: var(--bg2);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+      overflow: hidden;
+    }
+
+    /* Teal glow at top-left */
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      left: -60px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(45, 212, 191, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .sidebar-top {
+      padding: 20px 18px 16px;
+      border-bottom: 1px solid var(--line);
+      position: relative;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .logo-mark {
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--teal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .logo-mark::before {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      background: var(--teal-dim);
+    }
+
+    .logo-mark svg {
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-name {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--txt);
+      letter-spacing: 0.05em;
+      line-height: 1.2;
+    }
+
+    .logo-name span {
+      color: var(--teal);
+    }
+
+    .sys-tag {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 400;
+      color: var(--txt3);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sys-tag::before {
+      content: '';
+      display: block;
+      width: 14px;
+      height: 1px;
+      background: var(--line2);
+    }
+
+    .nav-section {
+      padding: 14px 0 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-section-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--txt3);
+      padding: 0 18px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--txt2);
+      cursor: pointer;
+      transition: all 0.15s;
+      border-left: 2px solid transparent;
+      margin-bottom: 1px;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      color: var(--txt);
+      background: var(--bg3);
+      border-left-color: var(--line2);
+    }
+
+    .nav-item.active {
+      color: var(--teal);
+      background: var(--teal-dim);
+      border-left-color: var(--teal);
+      font-weight: 500;
+    }
+
+    .nav-item svg {
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+
+    .nav-item.active svg {
+      opacity: 1;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--red-dim);
+      color: var(--red);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 600;
+      border-radius: 2px;
+      padding: 1px 5px;
+      min-width: 18px;
+      text-align: center;
+    }
+
+    .sidebar-footer {
+      padding: 14px 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .gateway-status {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--txt2);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 6px var(--teal);
+      flex-shrink: 0;
+    }
+
+    .status-dot.offline {
+      background: var(--red);
+      box-shadow: 0 0 6px var(--red);
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    .status-dot:not(.offline) {
+      animation: blink 2.5s ease-in-out infinite;
+    }
+
+    #gateway-url-display {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--txt3);
+      margin-top: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: 220px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--line);
+      padding: 0 28px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--txt3);
+    }
+
+    .topbar-breadcrumb span.active {
+      color: var(--txt);
+      font-weight: 500;
+    }
+
+    .topbar-sep {
+      color: var(--txt3);
+    }
+
+    .topbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .topbar-input-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg3);
+      border: 1px solid var(--line);
+      padding: 5px 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+
+    .topbar-input-label {
+      color: var(--txt3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── PAGES ── */
+    .page {
+      display: none;
+      padding: 28px;
+      animation: pgIn 0.2s ease;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes pgIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .page-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--txt);
+      letter-spacing: -0.3px;
+    }
+
+    .page-desc {
+      font-size: 12px;
+      color: var(--txt2);
+      margin-top: 3px;
+      font-family: var(--mono);
+    }
+
+    /* ── STAT GRID ── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--bg2);
+      padding: 20px 22px;
+      position: relative;
+      transition: background 0.15s;
+    }
+
+    .stat-card:hover {
+      background: var(--bg3);
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 22px;
+      right: 22px;
+      height: 1px;
+    }
+
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--txt3);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-card.c-teal .stat-value {
+      color: var(--teal);
+    }
+
+    .stat-card.c-amber .stat-value {
+      color: var(--amber);
+    }
+
+    .stat-card.c-red .stat-value {
+      color: var(--red);
+    }
+
+    .stat-card.c-sky .stat-value {
+      color: var(--sky);
+    }
+
+    .stat-note {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--txt3);
+    }
+
+    /* ── SECTION HEADING ── */
+    .sec-heading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .sec-heading-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--txt);
+      letter-spacing: 0.01em;
+    }
+
+    .sec-heading-line {
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+
+    /* ── PIPELINE ── */
+    .pipeline-wrap {
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      padding: 20px 22px;
+      margin-bottom: 24px;
+    }
+
+    .pipeline {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-wrap: wrap;
+      row-gap: 8px;
+    }
+
+    .pipe-node {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--bg3);
+      border: 1px solid var(--line2);
+      padding: 7px 12px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--txt2);
+      white-space: nowrap;
+    }
+
+    .pipe-node.hl {
+      background: var(--teal-dim);
+      border-color: rgba(45, 212, 191, 0.3);
+      color: var(--teal);
+    }
+
+    .pipe-node.hl-amber {
+      background: var(--amber-dim);
+      border-color: rgba(245, 158, 11, 0.3);
+      color: var(--amber);
+    }
+
+    .pipe-arrow {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--txt3);
+      padding: 0 6px;
+      flex-shrink: 0;
+    }
+
+    .pipeline-async-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--txt3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 14px 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pipeline-async-label::before {
+      content: '';
+      display: block;
+      width: 20px;
+      height: 1px;
+      background: var(--line2);
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--txt2);
+      flex: 1;
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    /* ── OVERVIEW 2-COL ── */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* ── TABLES ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      padding: 9px 16px;
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--txt3);
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid rgba(30, 37, 53, 0.8);
+      transition: background 0.12s;
+    }
+
+    tbody tr:hover {
+      background: var(--bg3);
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    td {
+      padding: 11px 16px;
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    .td-mono {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--txt2);
+    }
+
+    .truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 180px;
+      display: block;
+    }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      border: 1px solid;
+    }
+
+    .badge-teal {
+      color: var(--teal);
+      border-color: rgba(45, 212, 191, 0.3);
+      background: var(--teal-dim);
+    }
+
+    .badge-red {
+      color: var(--red);
+      border-color: rgba(244, 63, 94, 0.3);
+      background: var(--red-dim);
+    }
+
+    .badge-amber {
+      color: var(--amber);
+      border-color: rgba(245, 158, 11, 0.3);
+      background: var(--amber-dim);
+    }
+
+    .badge-sky {
+      color: var(--sky);
+      border-color: rgba(56, 189, 248, 0.3);
+      background: var(--sky-dim);
+    }
+
+    .badge-violet {
+      color: var(--violet);
+      border-color: rgba(167, 139, 250, 0.3);
+      background: var(--violet-dim);
+    }
+
+    .badge-muted {
+      color: var(--txt3);
+      border-color: var(--line);
+      background: transparent;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      border: 1px solid;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+
+    .btn-primary {
+      background: var(--teal);
+      color: var(--bg);
+      border-color: var(--teal);
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background: transparent;
+      color: var(--teal);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--txt2);
+      border-color: var(--line2);
+    }
+
+    .btn-ghost:hover {
+      color: var(--txt);
+      border-color: var(--txt2);
+      background: var(--bg3);
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--red);
+      border-color: rgba(244, 63, 94, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: var(--red-dim);
+      border-color: var(--red);
+    }
+
+    .btn-success {
+      background: transparent;
+      color: var(--teal);
+      border-color: rgba(45, 212, 191, 0.3);
+    }
+
+    .btn-success:hover {
+      background: var(--teal-dim);
+      border-color: var(--teal);
+    }
+
+    .btn-sm {
+      padding: 4px 9px;
+      font-size: 10px;
+    }
+
+    .btn-xs {
+      padding: 3px 7px;
+      font-size: 10px;
+    }
+
+    /* ── FORMS ── */
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--txt3);
+      margin-bottom: 5px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--line2);
+      color: var(--txt);
+      padding: 9px 11px;
+      font-family: var(--mono);
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 2px var(--teal-dim);
+    }
+
+    .form-input::placeholder {
+      color: var(--txt3);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-hint {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--txt3);
+      margin-top: 4px;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 9, 16, 0.85);
+      backdrop-filter: blur(3px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--line2);
+      width: 100%;
+      max-width: 540px;
+      animation: modalIn 0.2s ease;
+      position: relative;
+    }
+
+    .modal::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--teal), transparent 60%);
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-title {
+      font-size: 14px;
+      font-weight: 600;
+      flex: 1;
+      letter-spacing: -0.2px;
+    }
+
+    .modal-tag {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--teal);
+      background: var(--teal-dim);
+      border: 1px solid rgba(45, 212, 191, 0.2);
+      padding: 2px 7px;
+    }
+
+    .modal-close {
+      background: none;
+      border: 1px solid var(--line2);
+      color: var(--txt2);
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .modal-close:hover {
+      color: var(--txt);
+      border-color: var(--txt2);
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* ── TOAST ── */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg3);
+      border: 1px solid var(--line2);
+      padding: 10px 14px;
+      font-family: var(--mono);
+      font-size: 11px;
+      min-width: 260px;
+      animation: toastIn 0.2s ease;
+      border-left: 3px solid var(--line2);
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateX(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .toast.success {
+      border-left-color: var(--teal);
+    }
+
+    .toast.error {
+      border-left-color: var(--red);
+    }
+
+    .toast.info {
+      border-left-color: var(--sky);
+    }
+
+    .toast-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .toast.success .toast-dot {
+      background: var(--teal);
+    }
+
+    .toast.error .toast-dot {
+      background: var(--red);
+    }
+
+    .toast.info .toast-dot {
+      background: var(--sky);
+    }
+
+    /* ── CODE ── */
+    .code-block {
+      background: var(--bg);
+      border: 1px solid var(--line2);
+      padding: 12px 14px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--teal);
+      word-break: break-all;
+      white-space: pre-wrap;
+      position: relative;
+      line-height: 1.6;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: var(--bg3);
+      border: 1px solid var(--line2);
+      color: var(--txt2);
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .copy-btn:hover {
+      color: var(--teal);
+      border-color: var(--teal);
+    }
+
+    /* ── SPINNER ── */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 1.5px solid var(--line2);
+      border-top-color: var(--teal);
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--txt3);
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    .empty-state-glyph {
+      font-size: 32px;
+      margin-bottom: 10px;
+      opacity: 0.3;
+      font-family: var(--mono);
+      color: var(--txt3);
+    }
+
+    /* ── SEVERITY ── */
+    .sev-CRITICAL {
+      color: var(--red);
+      font-weight: 700;
+    }
+
+    .sev-HIGH {
+      color: var(--amber);
+      font-weight: 600;
+    }
+
+    .sev-MEDIUM {
+      color: var(--violet);
+    }
+
+    .sev-LOW {
+      color: var(--teal);
+    }
+
+    /* ── PROXY TEST ── */
+    .proxy-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .response-panel {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      min-height: 180px;
+      max-height: 380px;
+      overflow-y: auto;
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 14px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: var(--txt2);
+      line-height: 1.7;
+    }
+
+    .status-200 {
+      color: var(--teal);
+    }
+
+    .status-4xx {
+      color: var(--amber);
+    }
+
+    .status-5xx {
+      color: var(--red);
+    }
+
+    /* ── INFO STRIP ── */
+    .info-strip {
+      border-left: 3px solid var(--sky);
+      background: var(--sky-dim);
+      padding: 10px 14px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--txt2);
+      margin-bottom: 18px;
+      line-height: 1.65;
+    }
+
+    /* ── TOGGLE ── */
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 34px;
+      height: 18px;
+    }
+
+    .toggle input {
+      display: none;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--bg3);
+      border: 1px solid var(--line2);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--txt3);
+      top: 2px;
+      left: 2px;
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    .toggle input:checked+.toggle-slider {
+      border-color: var(--teal);
+      background: var(--teal-dim);
+    }
+
+    .toggle input:checked+.toggle-slider::before {
+      transform: translateX(16px);
+      background: var(--teal);
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--line2);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--txt3);
+    }
+
+    /* ── KEY CREATED RESULT ── */
+    .key-result {
+      display: none;
+      margin-top: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+    }
+
+    .key-result-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    /* ── SETTINGS ── */
+    .settings-block {
+      max-width: 520px;
+    }
+
+    .settings-info {
+      background: var(--bg3);
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--amber);
+      padding: 14px 16px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--txt2);
+      line-height: 1.75;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+      .stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .main {
+        margin-left: 0;
+      }
+
+      .proxy-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .overview-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="logo">
+          <div class="logo-mark">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M7 1L13 4V10L7 13L1 10V4L7 1Z" stroke="currentColor" stroke-width="1.2" fill="none"
+                style="color:var(--teal)" />
+              <circle cx="7" cy="7" r="2" fill="var(--teal)" opacity="0.7" />
+            </svg>
+          </div>
+          <div>
+            <div class="logo-name">AI<span>Gateway</span></div>
+          </div>
+        </div>
+        <div class="sys-tag">Admin Console</div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-label">System</div>
+        <div class="nav-item active" onclick="navigate('overview')" id="nav-overview">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4">
+            <rect x="1" y="1" width="5" height="5" />
+            <rect x="8" y="1" width="5" height="5" />
+            <rect x="1" y="8" width="5" height="5" />
+            <rect x="8" y="8" width="5" height="5" />
+          </svg>
+          Overview
+        </div>
+        <div class="nav-item" onclick="navigate('keys')" id="nav-keys">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4">
+            <circle cx="5.5" cy="6" r="3" />
+            <path d="M7.5 8L10 10.5M10 10.5L11.5 9M10 10.5V12.5" />
+          </svg>
+          API Keys
+        </div>
+        <div class="nav-item" onclick="navigate('routes')" id="nav-routes">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4">
+            <path d="M1 3h4l2 2l2-2h4" />
+            <path d="M1 7h3l1.5 1.5L7 7h3l1.5 1.5L13 7" />
+            <path d="M1 11h4l2-2l2 2h4" />
+          </svg>
+          Proxy Routes
+        </div>
+        <div class="nav-item" onclick="navigate('proxy')" id="nav-proxy">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4">
+            <path d="M2 7h10M8 3l4 4-4 4" />
+          </svg>
+          Test Proxy
+        </div>
+        <div class="nav-item" onclick="navigate('alerts')" id="nav-alerts">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4">
+            <path d="M7 1v1.5M7 11.5V13" />
+            <circle cx="7" cy="7" r="4" />
+            <path d="M7 5v2.5l1.5 1.5" />
+          </svg>
+          AI Alerts
+          <span class="nav-badge" id="alert-count-badge">0</span>
+        </div>
+        <div class="nav-item" onclick="navigate('settings')" id="nav-settings">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4">
+            <circle cx="7" cy="7" r="2.5" />
+            <path d="M7 1v1.5M7 11.5V13M1 7h1.5M11.5 7H13M2.5 2.5l1 1M10.5 10.5l1 1M11.5 2.5l-1 1M2.5 11.5l1-1" />
+          </svg>
+          Settings
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="gateway-status">
+          <div class="status-dot" id="status-dot"></div>
+          <span id="status-text" style="font-size:11px;">Checking…</span>
+        </div>
+        <div id="gateway-url-display"></div>
+      </div>
+    </aside>
+
+    <!-- ── MAIN ── -->
+    <main class="main">
+      <div class="topbar">
+        <div class="topbar-breadcrumb">
+          <span>aigateway</span>
+          <span class="topbar-sep">/</span>
+          <span class="active" id="page-title">overview</span>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-input-group">
+            <span class="topbar-input-label">host</span>
+            <span style="font-family:var(--mono); font-size:11px; color:var(--txt2);"
+              id="topbar-url-preview">localhost:8080</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="refreshAll()" id="refresh-btn">
+            <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M2 7a5 5 0 1 0 5-5 5 5 0 0 0-3.5 1.5L1 1" />
+              <path d="M1 1v3h3" />
+            </svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- ── OVERVIEW ── -->
+      <div class="page active" id="page-overview">
+        <div class="stat-grid">
+          <div class="stat-card c-teal">
+            <div class="stat-label">API Keys</div>
+            <div class="stat-value" id="stat-keys">—</div>
+            <div class="stat-note">registered credentials</div>
+          </div>
+          <div class="stat-card c-sky">
+            <div class="stat-label">Proxy Routes</div>
+            <div class="stat-value" id="stat-routes">—</div>
+            <div class="stat-note">upstream mappings</div>
+          </div>
+          <div class="stat-card c-red">
+            <div class="stat-label">Open Alerts</div>
+            <div class="stat-value" id="stat-alerts">—</div>
+            <div class="stat-note">unresolved anomalies</div>
+          </div>
+          <div class="stat-card c-amber">
+            <div class="stat-label">Gateway</div>
+            <div class="stat-value" id="stat-health">—</div>
+            <div class="stat-note">liveness status</div>
+          </div>
+        </div>
+
+        <div class="pipeline-wrap">
+          <div class="sec-heading" style="margin-bottom:12px;">
+            <span class="sec-heading-text">Request Pipeline</span>
+            <span class="sec-heading-line"></span>
+            <span
+              style="font-family:var(--mono); font-size:9px; color:var(--txt3); text-transform:uppercase; letter-spacing:0.1em;">synchronous
+              path</span>
+          </div>
+          <div class="pipeline">
+            <div class="pipe-node">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2">
+                <circle cx="5" cy="5" r="4" />
+              </svg>
+              Client
+            </div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node hl">Auth</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node hl">Rate Limiter</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node hl">Route Match</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node">Reverse Proxy</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node">Upstream</div>
+          </div>
+          <div class="pipeline-async-label">async background path</div>
+          <div class="pipeline">
+            <div class="pipe-node">Request logged</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node">Asynq / Redis</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node">Rule Detector</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node hl-amber">Claude AI</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node">Alert stored</div>
+          </div>
+        </div>
+
+        <div class="overview-grid">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Recent API Keys</div>
+              <button class="btn btn-ghost btn-xs" onclick="navigate('keys')">View all</button>
+            </div>
+            <div id="overview-keys-table">
+              <div class="empty-state">
+                <div class="spinner"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Recent Alerts</div>
+              <button class="btn btn-ghost btn-xs" onclick="navigate('alerts')">View all</button>
+            </div>
+            <div id="overview-alerts-table">
+              <div class="empty-state">
+                <div class="spinner"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── API KEYS ── -->
+      <div class="page" id="page-keys">
+        <div class="page-header">
+          <div>
+            <div class="page-title">API Keys</div>
+            <div class="page-desc">Create and manage client credentials. Raw keys shown once — store safely.</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('create-key-modal')">+ Create Key</button>
+        </div>
+        <div class="card">
+          <div id="keys-table-container">
+            <div class="empty-state">
+              <div class="spinner"></div>
+              <div style="margin-top:10px;">Loading…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PROXY ROUTES ── -->
+      <div class="page" id="page-routes">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Proxy Routes</div>
+            <div class="page-desc">Map URL patterns to upstream services. Routes are matched in order.</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('create-route-modal')">+ Add Route</button>
+        </div>
+        <div class="card">
+          <div id="routes-table-container">
+            <div class="empty-state">
+              <div class="spinner"></div>
+              <div style="margin-top:10px;">Loading…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TEST PROXY ── -->
+      <div class="page" id="page-proxy">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Test Proxy</div>
+            <div class="page-desc">Send a live request through the full middleware pipeline.</div>
+          </div>
+        </div>
+        <div class="info-strip">
+          Requests pass through auth → rate limit → route match → upstream proxy. Use a valid API Key from the Keys tab,
+          not the Admin Key.
+        </div>
+        <div class="proxy-grid">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Request</div>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Method</label>
+                <select class="form-input" id="proxy-method">
+                  <option>GET</option>
+                  <option>POST</option>
+                  <option>PUT</option>
+                  <option>DELETE</option>
+                  <option>PATCH</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Path</label>
+                <input class="form-input" id="proxy-path" type="text" placeholder="/api/your-route/..."
+                  value="/api/fakestore/products/1" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">X-API-Key <span style="color:var(--red)">*</span></label>
+                <input class="form-input" id="proxy-apikey" type="text" placeholder="Paste raw API key here" />
+                <div class="form-hint">The key returned on creation — not your Admin Key.</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Body (JSON, optional)</label>
+                <textarea class="form-input" id="proxy-body" rows="4" placeholder='{"key":"value"}'></textarea>
+              </div>
+              <button class="btn btn-primary" onclick="sendProxyRequest()" style="width:100%;" id="proxy-send-btn">Send
+                →</button>
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Response</div>
+                <span id="response-status-badge"></span>
+              </div>
+              <div class="card-body" style="padding:10px;">
+                <div class="response-panel" id="proxy-response">— awaiting request —</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Route Reference</div>
+              </div>
+              <div id="routes-quick-ref" style="padding:10px;">
+                <div class="empty-state" style="padding:16px;">
+                  <div class="spinner"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ALERTS ── -->
+      <div class="page" id="page-alerts">
+        <div class="page-header">
+          <div>
+            <div class="page-title">AI Anomaly Alerts</div>
+            <div class="page-desc">Generated by Claude when traffic patterns cross detection thresholds. CRITICAL alerts
+              auto-disable the key.</div>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <select class="form-input" id="alert-severity-filter" style="width:130px;" onchange="loadAlerts()">
+              <option value="">All severities</option>
+              <option value="CRITICAL">CRITICAL</option>
+              <option value="HIGH">HIGH</option>
+              <option value="MEDIUM">MEDIUM</option>
+              <option value="LOW">LOW</option>
+            </select>
+            <select class="form-input" id="alert-resolved-filter" style="width:120px;" onchange="loadAlerts()">
+              <option value="">All</option>
+              <option value="false">Unresolved</option>
+              <option value="true">Resolved</option>
+            </select>
+          </div>
+        </div>
+        <div class="card">
+          <div id="alerts-table-container">
+            <div class="empty-state">
+              <div class="spinner"></div>
+              <div style="margin-top:10px;">Loading…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div class="page" id="page-settings">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Settings</div>
+            <div class="page-desc">Connection configuration for this dashboard.</div>
+          </div>
+        </div>
+        <div class="settings-block">
+          <div class="card" style="margin-bottom:14px;">
+            <div class="card-header">
+              <div class="card-title">Connection</div>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Gateway Base URL</label>
+                <input class="form-input" id="settings-gateway-url" type="text" placeholder="http://localhost:8080" />
+                <div class="form-hint">URL where your gateway binary is running.</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Admin API Key</label>
+                <input class="form-input" id="settings-admin-key" type="password"
+                  placeholder="ADMIN_API_KEY from .env" />
+                <div class="form-hint">Stored in browser localStorage only. Never sent anywhere except your gateway.
+                </div>
+              </div>
+              <button class="btn btn-primary" onclick="saveSettings()">Save + Connect</button>
+            </div>
+          </div>
+          <div class="settings-info">
+            This dashboard makes direct fetch calls from your browser to the gateway.<br />
+            No backend, no build step. Admin calls target <code style="color:var(--teal);">/v1/admin/*</code>.
+            Proxy tests target <code style="color:var(--teal);">/api/*</code>.<br /><br />
+            Currently connecting to: <code style="color:var(--amber);"
+              id="settings-url-preview">http://localhost:8080</code>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ── MODALS ── -->
+
+  <!-- Create API Key -->
+  <div class="modal-overlay" id="create-key-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-tag">New</div>
+        <div class="modal-title">Create API Key</div>
+        <button class="modal-close" onclick="closeModal('create-key-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Name <span style="color:var(--red)">*</span></label>
+            <input class="form-input" id="key-name" type="text" placeholder="my-service" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Owner ID <span style="color:var(--red)">*</span></label>
+            <input class="form-input" id="key-owner" type="text" placeholder="user-123" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rate Limit (req/min)</label>
+          <input class="form-input" id="key-rpm" type="number" value="60" />
+          <div class="form-hint">0 = use system default.</div>
+        </div>
+        <div class="key-result" id="key-created-result">
+          <div class="key-result-label">Key created — copy now. Not shown again.</div>
+          <div class="code-block" id="key-raw-value">
+            <button class="copy-btn" onclick="copyToClipboard('key-raw-value')">Copy</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('create-key-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="createAPIKey()" id="create-key-btn">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Route -->
+  <div class="modal-overlay" id="create-route-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-tag">New</div>
+        <div class="modal-title">Add Proxy Route</div>
+        <button class="modal-close" onclick="closeModal('create-route-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Route Name <span style="color:var(--red)">*</span></label>
+            <input class="form-input" id="route-name" type="text" placeholder="fakestore" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Timeout (ms)</label>
+            <input class="form-input" id="route-timeout" type="number" value="5000" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Path Pattern <span style="color:var(--red)">*</span></label>
+          <input class="form-input" id="route-pattern" type="text" placeholder="/api/fakestore/*"
+            style="font-family:var(--mono);" />
+          <div class="form-hint">Use * as wildcard. Start with /api/</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Target URL <span style="color:var(--red)">*</span></label>
+          <input class="form-input" id="route-target" type="text" placeholder="https://fakestoreapi.com"
+            style="font-family:var(--mono);" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+            Strip Path Prefix
+            <label class="toggle">
+              <input type="checkbox" id="route-strip" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </label>
+          <div class="form-hint">/api/fakestore/products → /products at upstream when enabled.</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('create-route-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="createRoute()" id="create-route-btn">Add Route</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Detail -->
+  <div class="modal-overlay" id="alert-detail-modal">
+    <div class="modal" style="max-width:600px;">
+      <div class="modal-header">
+        <div class="modal-tag">Alert</div>
+        <div class="modal-title">Anomaly Report</div>
+        <button class="modal-close" onclick="closeModal('alert-detail-modal')">✕</button>
+      </div>
+      <div class="modal-body" id="alert-detail-body">
+        <div class="empty-state">
+          <div class="spinner"></div>
+        </div>
+      </div>
+      <div class="modal-footer" id="alert-detail-footer"></div>
+    </div>
+  </div>
+
+  <!-- Edit Key -->
+  <div class="modal-overlay" id="edit-key-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-tag">Edit</div>
+        <div class="modal-title">Update API Key</div>
+        <button class="modal-close" onclick="closeModal('edit-key-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="edit-key-id" />
+        <div class="form-group">
+          <label class="form-label">Rate Limit (req/min)</label>
+          <input class="form-input" id="edit-key-rpm" type="number" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+            Active
+            <label class="toggle">
+              <input type="checkbox" id="edit-key-active" />
+              <span class="toggle-slider"></span>
+            </label>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('edit-key-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="updateKey()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    // ── State ──────────────────────────────────────────────────────────────
+    let gatewayUrl = localStorage.getItem('gw_url') || 'http://localhost:8080';
+    let adminKey = localStorage.getItem('gw_admin_key') || '';
+
+    // ── API helpers ────────────────────────────────────────────────────────
+    function api(path, opts = {}) {
+      const headers = {
+        'Content-Type': 'application/json',
+        'X-Admin-Key': adminKey,
+        ...(opts.headers || {})
+      };
+      return fetch(gatewayUrl + path, { ...opts, headers })
+        .then(async res => {
+          const body = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+          return body;
+        });
+    }
+
+    function proxyApi(path, method, apiKey, body) {
+      const headers = { 'X-API-Key': apiKey };
+      if (body) headers['Content-Type'] = 'application/json';
+      return fetch(gatewayUrl + path, { method, headers, body: body || undefined });
+    }
+
+    // ── Navigation ─────────────────────────────────────────────────────────
+    function navigate(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('page-' + page).classList.add('active');
+      document.getElementById('nav-' + page).classList.add('active');
+      document.getElementById('page-title').textContent = page;
+      if (page === 'keys') loadKeys();
+      if (page === 'routes') loadRoutes();
+      if (page === 'alerts') loadAlerts();
+      if (page === 'proxy') loadRoutesQuickRef();
+    }
+
+    // ── Modal ──────────────────────────────────────────────────────────────
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+      if (id === 'create-key-modal') {
+        document.getElementById('key-created-result').style.display = 'none';
+        document.getElementById('key-name').value = '';
+        document.getElementById('key-owner').value = '';
+        document.getElementById('key-rpm').value = '60';
+        document.getElementById('create-key-btn').textContent = 'Create';
+      }
+    }
+
+    // ── Toast ──────────────────────────────────────────────────────────────
+    function toast(msg, type = 'info') {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.innerHTML = `<span class="toast-dot"></span><span class="toast-msg" style="font-family:var(--mono);font-size:11px;">${msg}</span>`;
+      document.getElementById('toast-container').appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
+
+    // ── Utilities ──────────────────────────────────────────────────────────
+    function copyToClipboard(elId) {
+      const text = document.getElementById(elId).textContent.replace('Copy', '').trim();
+      navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard', 'success'));
+    }
+
+    function fmt(dateStr) {
+      if (!dateStr) return '—';
+      return new Date(dateStr).toLocaleString();
+    }
+
+    function severityBadge(s) {
+      const cls = { CRITICAL: 'badge-red', HIGH: 'badge-amber', MEDIUM: 'badge-violet', LOW: 'badge-teal' };
+      return `<span class="badge ${cls[s] || 'badge-muted'}">${s || 'N/A'}</span>`;
+    }
+
+    function activeBadge(a) {
+      return a
+        ? `<span class="badge badge-teal">active</span>`
+        : `<span class="badge badge-red">inactive</span>`;
+    }
+
+    // ── Health ─────────────────────────────────────────────────────────────
+    async function checkHealth() {
+      const dot = document.getElementById('status-dot');
+      const txt = document.getElementById('status-text');
+      const url = document.getElementById('gateway-url-display');
+      const prev = document.getElementById('topbar-url-preview');
+      url.textContent = gatewayUrl;
+      if (prev) prev.textContent = gatewayUrl.replace(/^https?:\/\//, '');
+      try {
+        const r = await fetch(gatewayUrl + '/health', { signal: AbortSignal.timeout(3000) });
+        if (r.ok) {
+          dot.className = 'status-dot';
+          txt.textContent = 'Gateway online';
+          document.getElementById('stat-health').textContent = 'Online';
+          return true;
+        }
+      } catch (_) { }
+      dot.className = 'status-dot offline';
+      txt.textContent = 'Gateway offline';
+      document.getElementById('stat-health').textContent = 'Offline';
+      return false;
+    }
+
+    // ── Overview ───────────────────────────────────────────────────────────
+    async function loadOverview() {
+      checkHealth();
+
+      api('/v1/admin/keys').then(keys => {
+        keys = Array.isArray(keys) ? keys : [];
+        document.getElementById('stat-keys').textContent = keys.length;
+        const rows = keys.slice(0, 5).map(k => `
+      <tr>
+        <td style="font-weight:500;">${k.name}</td>
+        <td>${activeBadge(k.is_active)}</td>
+        <td class="td-mono">${k.rate_limit_rpm} rpm</td>
+      </tr>`).join('');
+        document.getElementById('overview-keys-table').innerHTML = keys.length
+          ? `<table><thead><tr><th>Name</th><th>Status</th><th>Rate</th></tr></thead><tbody>${rows}</tbody></table>`
+          : `<div class="empty-state"><div class="empty-state-glyph">[ ]</div>No keys yet</div>`;
+      }).catch(() => { document.getElementById('stat-keys').textContent = 'err'; });
+
+      api('/v1/admin/routes').then(r => {
+        document.getElementById('stat-routes').textContent = Array.isArray(r) ? r.length : '—';
+      }).catch(() => { });
+
+      api('/v1/admin/alerts?resolved=false').then(alerts => {
+        alerts = Array.isArray(alerts) ? alerts : [];
+        document.getElementById('stat-alerts').textContent = alerts.length;
+        document.getElementById('alert-count-badge').textContent = alerts.length;
+        const rows = alerts.slice(0, 5).map(a => `
+      <tr>
+        <td>${severityBadge(a.severity)}</td>
+        <td style="font-size:12px; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${a.anomaly_type || 'Unknown'}</td>
+        <td class="td-mono">${fmt(a.detected_at)}</td>
+      </tr>`).join('');
+        document.getElementById('overview-alerts-table').innerHTML = alerts.length
+          ? `<table><thead><tr><th>Severity</th><th>Type</th><th>Detected</th></tr></thead><tbody>${rows}</tbody></table>`
+          : `<div class="empty-state"><div class="empty-state-glyph">[ok]</div>No open alerts</div>`;
+      }).catch(() => { document.getElementById('stat-alerts').textContent = 'err'; });
+    }
+
+    // ── API Keys ───────────────────────────────────────────────────────────
+    async function loadKeys() {
+      document.getElementById('keys-table-container').innerHTML = `<div class="empty-state"><div class="spinner"></div><div style="margin-top:10px;">Loading…</div></div>`;
+      try {
+        const keys = await api('/v1/admin/keys');
+        if (!keys || !keys.length) {
+          document.getElementById('keys-table-container').innerHTML = `<div class="empty-state"><div class="empty-state-glyph">[ ]</div>No API keys yet</div>`;
+          return;
+        }
+        const rows = keys.map(k => `
+      <tr>
+        <td>
+          <div style="font-weight:500;">${k.name}</div>
+          <div class="td-mono truncate">${k.id}</div>
+        </td>
+        <td class="td-mono">${k.owner_id || '—'}</td>
+        <td>${activeBadge(k.is_active)}</td>
+        <td class="td-mono">${k.rate_limit_rpm} rpm</td>
+        <td class="td-mono" style="font-size:11px;">${fmt(k.created_at)}</td>
+        <td>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-ghost btn-xs" onclick="openEditKey('${k.id}', ${k.rate_limit_rpm}, ${k.is_active})">Edit</button>
+            <button class="btn btn-danger btn-xs" onclick="revokeKey('${k.id}', '${k.name}')">Revoke</button>
+          </div>
+        </td>
+      </tr>`).join('');
+        document.getElementById('keys-table-container').innerHTML = `
+      <table>
+        <thead><tr><th>Name / ID</th><th>Owner</th><th>Status</th><th>Rate</th><th>Created</th><th>Actions</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+      } catch (e) {
+        document.getElementById('keys-table-container').innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+      }
+    }
+
+    async function createAPIKey() {
+      const name = document.getElementById('key-name').value.trim();
+      const owner = document.getElementById('key-owner').value.trim();
+      const rpm = parseInt(document.getElementById('key-rpm').value) || 60;
+      if (!name || !owner) { toast('Name and Owner ID required', 'error'); return; }
+      const btn = document.getElementById('create-key-btn');
+      btn.innerHTML = '<span class="spinner"></span>';
+      btn.disabled = true;
+      try {
+        const res = await api('/v1/admin/keys', {
+          method: 'POST',
+          body: JSON.stringify({ name, owner_id: owner, rate_limit_rpm: rpm })
+        });
+        document.getElementById('key-raw-value').innerHTML = `<button class="copy-btn" onclick="copyToClipboard('key-raw-value')">Copy</button>${res.raw_key || JSON.stringify(res)}`;
+        document.getElementById('key-created-result').style.display = 'block';
+        btn.textContent = 'Created';
+        toast('API key created — copy it now', 'success');
+        loadKeys();
+      } catch (e) {
+        toast('Failed: ' + e.message, 'error');
+        btn.textContent = 'Create';
+        btn.disabled = false;
+      }
+    }
+
+    function openEditKey(id, rpm, active) {
+      document.getElementById('edit-key-id').value = id;
+      document.getElementById('edit-key-rpm').value = rpm;
+      document.getElementById('edit-key-active').checked = active;
+      openModal('edit-key-modal');
+    }
+
+    async function updateKey() {
+      const id = document.getElementById('edit-key-id').value;
+      const rpm = parseInt(document.getElementById('edit-key-rpm').value);
+      const active = document.getElementById('edit-key-active').checked;
+      try {
+        await api(`/v1/admin/keys/${id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ rate_limit_rpm: rpm, is_active: active })
+        });
+        toast('Key updated', 'success');
+        closeModal('edit-key-modal');
+        loadKeys();
+      } catch (e) { toast('Update failed: ' + e.message, 'error'); }
+    }
+
+    async function revokeKey(id, name) {
+      if (!confirm(`Revoke key "${name}"? It will stop working immediately.`)) return;
+      try {
+        await api(`/v1/admin/keys/${id}`, { method: 'DELETE' });
+        toast(`Key "${name}" revoked`, 'success');
+        loadKeys();
+      } catch (e) { toast('Failed: ' + e.message, 'error'); }
+    }
+
+    // ── Routes ─────────────────────────────────────────────────────────────
+    async function loadRoutes() {
+      document.getElementById('routes-table-container').innerHTML = `<div class="empty-state"><div class="spinner"></div><div style="margin-top:10px;">Loading…</div></div>`;
+      try {
+        const routes = await api('/v1/admin/routes');
+        if (!routes || !routes.length) {
+          document.getElementById('routes-table-container').innerHTML = `<div class="empty-state"><div class="empty-state-glyph">[ ]</div>No routes yet</div>`;
+          return;
+        }
+        const rows = routes.map(r => `
+      <tr>
+        <td style="font-weight:500;">${r.name}</td>
+        <td><code style="font-family:var(--mono); font-size:11px; color:var(--sky);">${r.path_pattern}</code></td>
+        <td><code style="font-family:var(--mono); font-size:11px; color:var(--teal);">${r.target_url}</code></td>
+        <td>${r.strip_prefix ? `<span class="badge badge-sky">yes</span>` : `<span class="badge badge-muted">no</span>`}</td>
+        <td>${activeBadge(r.is_active)}</td>
+        <td class="td-mono">${r.timeout_ms}ms</td>
+        <td>
+          <button class="btn btn-danger btn-xs" onclick="deleteRoute('${r.id}', '${r.name}')">Delete</button>
+        </td>
+      </tr>`).join('');
+        document.getElementById('routes-table-container').innerHTML = `
+      <table>
+        <thead><tr><th>Name</th><th>Pattern</th><th>Target</th><th>Strip</th><th>Status</th><th>Timeout</th><th>Actions</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+      } catch (e) {
+        document.getElementById('routes-table-container').innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+      }
+    }
+
+    async function createRoute() {
+      const name = document.getElementById('route-name').value.trim();
+      const pattern = document.getElementById('route-pattern').value.trim();
+      const target = document.getElementById('route-target').value.trim();
+      const strip = document.getElementById('route-strip').checked;
+      const timeout = parseInt(document.getElementById('route-timeout').value) || 5000;
+      if (!name || !pattern || !target) { toast('Name, pattern, and target required', 'error'); return; }
+      const btn = document.getElementById('create-route-btn');
+      btn.innerHTML = '<span class="spinner"></span>';
+      btn.disabled = true;
+      try {
+        await api('/v1/admin/routes', {
+          method: 'POST',
+          body: JSON.stringify({ name, path_pattern: pattern, target_url: target, strip_prefix: strip, timeout_ms: timeout })
+        });
+        toast('Route added', 'success');
+        closeModal('create-route-modal');
+        loadRoutes();
+        ['route-name', 'route-pattern', 'route-target'].forEach(id => document.getElementById(id).value = '');
+      } catch (e) { toast('Failed: ' + e.message, 'error'); }
+      finally { btn.textContent = 'Add Route'; btn.disabled = false; }
+    }
+
+    async function deleteRoute(id, name) {
+      if (!confirm(`Delete route "${name}"? Matching requests will return 404.`)) return;
+      try {
+        await api(`/v1/admin/routes/${id}`, { method: 'DELETE' });
+        toast(`Route "${name}" deleted`, 'success');
+        loadRoutes();
+      } catch (e) { toast('Failed: ' + e.message, 'error'); }
+    }
+
+    // ── Proxy Tester ───────────────────────────────────────────────────────
+    async function loadRoutesQuickRef() {
+      const el = document.getElementById('routes-quick-ref');
+      try {
+        const routes = await api('/v1/admin/routes');
+        if (!routes || !routes.length) {
+          el.innerHTML = `<div class="empty-state" style="padding:14px; font-size:11px;">No routes yet</div>`;
+          return;
+        }
+        el.innerHTML = routes.map(r => `
+      <div style="padding:8px 10px; border-bottom:1px solid var(--line); cursor:pointer; transition:background 0.12s;"
+           onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''"
+           onclick="document.getElementById('proxy-path').value='${r.path_pattern.replace('*', '')}1'">
+        <div style="font-size:12px; font-weight:500; margin-bottom:2px;">${r.name}</div>
+        <code style="font-size:10px; color:var(--sky); font-family:var(--mono);">${r.path_pattern}</code>
+        <span style="font-family:var(--mono); font-size:10px; color:var(--txt3);"> → </span>
+        <code style="font-size:10px; color:var(--teal); font-family:var(--mono);">${r.target_url}</code>
+      </div>`).join('');
+      } catch (e) {
+        el.innerHTML = `<div style="padding:10px; font-family:var(--mono); font-size:11px; color:var(--red);">Error: ${e.message}</div>`;
+      }
+    }
+
+    async function sendProxyRequest() {
+      const method = document.getElementById('proxy-method').value;
+      const path = document.getElementById('proxy-path').value.trim();
+      const apiKey = document.getElementById('proxy-apikey').value.trim();
+      const body = document.getElementById('proxy-body').value.trim();
+      const respEl = document.getElementById('proxy-response');
+      const btn = document.getElementById('proxy-send-btn');
+      const badge = document.getElementById('response-status-badge');
+      if (!path) { toast('Path is required', 'error'); return; }
+      if (!apiKey) { toast('API Key is required', 'error'); return; }
+      btn.innerHTML = '<span class="spinner"></span> Sending…';
+      btn.disabled = true;
+      respEl.textContent = 'Sending…';
+      badge.innerHTML = '';
+      try {
+        const t0 = Date.now();
+        const res = await proxyApi(path, method, apiKey, body || null);
+        const ms = Date.now() - t0;
+        const raw = await res.text();
+        let pretty;
+        try { pretty = JSON.stringify(JSON.parse(raw), null, 2); } catch { pretty = raw; }
+        const cls = res.status < 300 ? 'status-200' : res.status < 500 ? 'status-4xx' : 'status-5xx';
+        respEl.innerHTML = `<span class="${cls}">HTTP ${res.status} ${res.statusText} · ${ms}ms</span>\n\n${pretty}`;
+        badge.innerHTML = `<span class="badge ${res.ok ? 'badge-teal' : 'badge-red'}">${res.status}</span>`;
+      } catch (e) {
+        respEl.innerHTML = `<span class="status-5xx">Network Error</span>\n\n${e.message}`;
+        badge.innerHTML = `<span class="badge badge-red">ERR</span>`;
+      } finally {
+        btn.textContent = 'Send →';
+        btn.disabled = false;
+      }
+    }
+
+    // ── Alerts ─────────────────────────────────────────────────────────────
+    async function loadAlerts() {
+      document.getElementById('alerts-table-container').innerHTML = `<div class="empty-state"><div class="spinner"></div><div style="margin-top:10px;">Loading…</div></div>`;
+      const sev = document.getElementById('alert-severity-filter').value;
+      const res = document.getElementById('alert-resolved-filter').value;
+      let qs = [];
+      if (sev) qs.push(`severity=${sev}`);
+      if (res !== '') qs.push(`resolved=${res}`);
+      const query = qs.length ? '?' + qs.join('&') : '';
+      try {
+        const alerts = await api('/v1/admin/alerts' + query);
+        if (!alerts || !alerts.length) {
+          document.getElementById('alerts-table-container').innerHTML = `<div class="empty-state"><div class="empty-state-glyph">[ok]</div>No alerts match filters</div>`;
+          return;
+        }
+        const rows = alerts.map(a => `
+      <tr>
+        <td>${severityBadge(a.severity)}</td>
+        <td style="font-weight:500; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${a.anomaly_type || 'Unknown'}</td>
+        <td class="td-mono truncate">${a.api_key_id || '—'}</td>
+        <td>${a.is_resolved ? `<span class="badge badge-teal">resolved</span>` : `<span class="badge badge-red">open</span>`}</td>
+        <td class="td-mono" style="font-size:11px;">${fmt(a.detected_at)}</td>
+        <td>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-ghost btn-xs" onclick="viewAlert('${a.id}')">Details</button>
+            ${!a.is_resolved ? `<button class="btn btn-success btn-xs" onclick="resolveAlert('${a.id}')">Resolve</button>` : ''}
+          </div>
+        </td>
+      </tr>`).join('');
+        document.getElementById('alerts-table-container').innerHTML = `
+      <table>
+        <thead><tr><th>Severity</th><th>Type</th><th>Key ID</th><th>Status</th><th>Detected</th><th>Actions</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+      } catch (e) {
+        document.getElementById('alerts-table-container').innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+      }
+    }
+
+    async function viewAlert(id) {
+      openModal('alert-detail-modal');
+      document.getElementById('alert-detail-body').innerHTML = `<div class="empty-state"><div class="spinner"></div></div>`;
+      document.getElementById('alert-detail-footer').innerHTML = '';
+      try {
+        const a = await api(`/v1/admin/alerts/${id}`);
+        document.getElementById('alert-detail-body').innerHTML = `
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px;">
+        <div>
+          <div class="form-label">Severity</div>
+          ${severityBadge(a.severity)}
+        </div>
+        <div>
+          <div class="form-label">Status</div>
+          ${a.is_resolved ? `<span class="badge badge-teal">resolved</span>` : `<span class="badge badge-red">open</span>`}
+        </div>
+        <div>
+          <div class="form-label">Anomaly Type</div>
+          <div style="font-size:13px; font-weight:500;">${a.anomaly_type || '—'}</div>
+        </div>
+        <div>
+          <div class="form-label">Detected At</div>
+          <div class="td-mono" style="font-size:12px;">${fmt(a.detected_at)}</div>
+        </div>
+        <div style="grid-column:1/-1;">
+          <div class="form-label">API Key ID</div>
+          <code style="font-family:var(--mono); font-size:11px; color:var(--sky);">${a.api_key_id || '—'}</code>
+        </div>
+      </div>
+      <div class="form-label" style="margin-bottom:6px;">Claude AI Explanation</div>
+      <div class="code-block" style="color:var(--txt2); max-height:200px; overflow-y:auto; font-size:11px; line-height:1.7;">${a.claude_explanation || 'No AI explanation available yet.'}</div>
+    `;
+        if (!a.is_resolved) {
+          document.getElementById('alert-detail-footer').innerHTML = `
+        <button class="btn btn-ghost" onclick="closeModal('alert-detail-modal')">Close</button>
+        <button class="btn btn-ghost" onclick="resolveAlert('${a.id}', false); closeModal('alert-detail-modal')">Resolve (keep key disabled)</button>
+        <button class="btn btn-success" onclick="resolveAlert('${a.id}', true); closeModal('alert-detail-modal')">Resolve + re-enable key</button>
+      `;
+        } else {
+          document.getElementById('alert-detail-footer').innerHTML = `<button class="btn btn-ghost" onclick="closeModal('alert-detail-modal')">Close</button>`;
+        }
+      } catch (e) {
+        document.getElementById('alert-detail-body').innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+      }
+    }
+
+    async function resolveAlert(id, reEnableKey = false) {
+      try {
+        await api(`/v1/admin/alerts/${id}/resolve?re_enable_key=${reEnableKey}`, { method: 'PATCH' });
+        toast('Alert resolved' + (reEnableKey ? ' · key re-enabled' : ''), 'success');
+        closeModal('alert-detail-modal');
+        loadAlerts();
+      } catch (e) { toast('Failed: ' + e.message, 'error'); }
+    }
+
+    // ── Settings ───────────────────────────────────────────────────────────
+    function loadSettings() {
+      document.getElementById('settings-gateway-url').value = gatewayUrl;
+      document.getElementById('settings-admin-key').value = adminKey;
+      document.getElementById('settings-url-preview').textContent = gatewayUrl;
+    }
+
+    function saveSettings() {
+      gatewayUrl = document.getElementById('settings-gateway-url').value.trim().replace(/\/$/, '');
+      adminKey = document.getElementById('settings-admin-key').value.trim();
+      localStorage.setItem('gw_url', gatewayUrl);
+      localStorage.setItem('gw_admin_key', adminKey);
+      document.getElementById('settings-url-preview').textContent = gatewayUrl;
+      document.getElementById('gateway-url-display').textContent = gatewayUrl;
+      const prev = document.getElementById('topbar-url-preview');
+      if (prev) prev.textContent = gatewayUrl.replace(/^https?:\/\//, '');
+      toast('Settings saved', 'success');
+      checkHealth();
+    }
+
+    // ── Refresh ────────────────────────────────────────────────────────────
+    function refreshAll() {
+      const pg = document.querySelector('.page.active').id.replace('page-', '');
+      checkHealth();
+      if (pg === 'overview') loadOverview();
+      if (pg === 'keys') loadKeys();
+      if (pg === 'routes') loadRoutes();
+      if (pg === 'alerts') loadAlerts();
+      if (pg === 'proxy') loadRoutesQuickRef();
+      toast('Refreshed', 'info');
+    }
+
+    // Close modals on backdrop click
+    document.querySelectorAll('.modal-overlay').forEach(o => {
+      o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+    });
+
+    // ── Init ───────────────────────────────────────────────────────────────
+    (function init() {
+      loadSettings();
+      checkHealth();
+      loadOverview();
+    })();
+  </script>
+</body>
+
+</html>
